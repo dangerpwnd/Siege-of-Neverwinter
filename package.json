@@ -1,0 +1,36 @@
+{
+  "name": "siege-of-neverwinter",
+  "version": "1.0.0",
+  "description": "D&D 5e Campaign Management Tool for Siege of Neverwinter",
+  "main": "server/index.js",
+  "scripts": {
+    "start": "node server/index.js",
+    "dev": "node server/index.js",
+    "db:init": "node database/init.js",
+    "db:test": "node database/test-connection.js",
+    "db:setup": "node database/setup.js",
+    "db:migrate": "node database/migrate.js",
+    "db:seed": "node database/seed.js",
+    "db:optimize": "node database/apply-optimizations.js",
+    "test": "jest --runInBand",
+    "test:watch": "jest --watch"
+  },
+  "keywords": [
+    "dnd",
+    "campaign",
+    "siege"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^16.3.1",
+    "express": "^4.18.2",
+    "pg": "^8.11.3"
+  },
+  "devDependencies": {
+    "fast-check": "^4.3.0",
+    "jest": "^30.2.0",
+    "jsdom": "^27.2.0"
+  }
+}
