@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Responsive Layout Test - Siege of Neverwinter</title>
+    <link rel="stylesheet" href="main.css">
+    <style>
+        .test-info {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 10px;
+            border-radius: 4px;
+            font-family: monospace;
+            z-index: 1000;
+        }
+        .viewport-size {
+            font-weight: bold;
+            color: #e5c158;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-info">
+        <div>Viewport: <span class="viewport-size" id="viewport-size"></span></div>
+        <div>Breakpoint: <span class="viewport-size" id="breakpoint"></span></div>
+    </div>
+
+    <div id="app">
+        <header class="app-header">
+            <h1>Siege of Neverwinter</h1>
+            <div class="header-controls">
+                <select class="campaign-selector">
+                    <option>Test Campaign</option>
+                </select>
+                <button class="btn btn-secondary">New</button>
+                <button class="btn btn-secondary">Export</button>
+                <button class="btn btn-primary">Save</button>
+            </div>
+        </header>
+
+        <main class="app-main">
+            <div class="module-grid">
+                <!-- Initiative Module -->
+                <div id="initiative-module" class="module">
+                    <div class="module-header">
+                        <h2>Initiative Tracker</h2>
+                        <button class="module-toggle">−</button>
+                    </div>
+                    <div class="module-content">
+                        <div class="initiative-item active type-pc">
+                            <div class="initiative-header">
+                                <div class="initiative-value">18</div>
+                                <div class="combatant-info">
+                                    <span class="combatant-name">Thorin</span>
+                                    <span class="type-badge type-pc">PC</span>
+                                </div>
+                            </div>
+                            <div class="initiative-details">
+                                <div class="stat-group">
+                                    <span class="stat-label">AC:</span>
+                                    <span class="stat-value">16</span>
+                                </div>
+                                <div class="stat-group">
+                                    <span class="stat-label">HP:</span>
+                                    <span class="stat-value">45/52</span>
+                                </div>
+                                <div class="condition-indicators">
+                                    <span class="condition-badge">Blessed</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="initiative-item type-monster">
+                            <div class="initiative-header">
+                                <div class="initiative-value">15</div>
+                                <div class="combatant-info">
+                                    <span class="combatant-name">Red Dragon</span>
+                                    <span class="type-badge type-monster">Monster</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Character Module -->
+                <div id="character-module" class="module">
+                    <div class="module-header">
+                        <h2>Character Panel</h2>
+                        <button class="module-toggle">−</button>
+                    </div>
+                    <div class="module-content">
+                        <div class="stat-block">
+                            <label>Armor Class</label>
+                            <div class="stat-value">16</div>
+                        </div>
+                        <div class="stat-block">
+                            <label>Hit Points</label>
+                            <div class="stat-value">45/52</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- NPC Module -->
+                <div id="npc-module" class="module">
+                    <div class="module-header">
+                        <h2>NPC Panel</h2>
+                        <button class="module-toggle">−</button>
+                    </div>
+                    <div class="module-content">
+                        <p>NPC information displayed here</p>
+                    </div>
+                </div>
+
+                <!-- Monster Module -->
+                <div id="monster-module" class="module">
+                    <div class="module-header">
+                        <h2>Monster Database</h2>
+                        <button class="module-toggle">−</button>
+                    </div>
+                    <div class="module-content">
+                        <p>Monster database displayed here</p>
+                    </div>
+                </div>
+
+                <!-- Siege Module -->
+                <div id="siege-module" class="module">
+                    <div class="module-header">
+                        <h2>Siege Mechanics</h2>
+                        <button class="module-toggle">−</button>
+                    </div>
+                    <div class="module-content">
+                        <p>Siege mechanics displayed here</p>
+                    </div>
+                </div>
+
+                <!-- AI Module -->
+                <div id="ai-module" class="module">
+                    <div class="module-header">
+                        <h2>AI DM Assistant</h2>
+                        <button class="module-toggle">−</button>
+                    </div>
+                    <div class="module-content">
+                        <p>AI assistant displayed here</p>
+                    </div>
+                </div>
+
+                <!-- Map Module -->
+                <div id="map-module" class="module">
+                    <div class="module-header">
+                        <h2>City Map</h2>
+                        <button class="module-toggle">−</button>
+                    </div>
+                    <div class="module-content">
+                        <p>City map displayed here</p>
+                    </div>
+                </div>
+
+                <!-- Condition Module -->
+                <div id="condition-module" class="module">
+                    <div class="module-header">
+                        <h2>Condition Manager</h2>
+                        <button class="module-toggle">−</button>
+                    </div>
+                    <div class="module-content">
+                        <div class="condition-badge">Poisoned</div>
+                        <div class="condition-badge">Stunned</div>
+                        <div class="condition-badge">Frightened</div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        function updateViewportInfo() {
+            const width = window.innerWidth;
+            const height = window.innerHeight;
+            document.getElementById('viewport-size').textContent = `${width}x${height}px`;
+            
+            let breakpoint = '';
+            if (width >= 1600) {
+                breakpoint = 'Large Desktop (1600px+)';
+            } else if (width >= 1200) {
+                breakpoint = 'Desktop (1200-1599px)';
+            } else if (width >= 900) {
+                breakpoint = 'Tablet Landscape (900-1199px)';
+            } else if (width >= 600) {
+                breakpoint = 'Tablet Portrait (600-899px)';
+            } else {
+                breakpoint = 'Mobile (< 600px)';
+            }
+            document.getElementById('breakpoint').textContent = breakpoint;
+        }
+
+        updateViewportInfo();
+        window.addEventListener('resize', updateViewportInfo);
+    </script>
+</body>
+</html>
