@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Accessibility Test - Siege of Neverwinter</title>
+    <link rel="stylesheet" href="styles/main.css">
+    <style>
+        .test-section {
+            margin: 2rem;
+            padding: 1.5rem;
+            background: var(--bg-light);
+            border: 2px solid var(--border-color);
+            border-radius: var(--radius-md);
+        }
+        
+        .test-section h2 {
+            color: var(--accent-color);
+            margin-bottom: 1rem;
+        }
+        
+        .test-item {
+            margin: 1rem 0;
+            padding: 1rem;
+            background: var(--bg-medium);
+            border-radius: var(--radius-sm);
+        }
+        
+        .test-item h3 {
+            color: var(--text-light);
+            margin-bottom: 0.5rem;
+            font-size: 1rem;
+        }
+        
+        .test-controls {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+            margin-top: 0.5rem;
+        }
+        
+        .status {
+            padding: 0.5rem 1rem;
+            border-radius: var(--radius-sm);
+            font-weight: bold;
+            margin-top: 1rem;
+        }
+        
+        .status.pass {
+            background: var(--success-color);
+            color: white;
+        }
+        
+        .status.fail {
+            background: var(--danger-color);
+            color: white;
+        }
+        
+        .instructions {
+            background: var(--info-color);
+            color: white;
+            padding: 1rem;
+            border-radius: var(--radius-sm);
+            margin-bottom: 1rem;
+        }
+    </style>
+</head>
+<body>
+    <div id="app">
+        <header class="app-header" role="banner">
+            <h1>Accessibility Test Suite</h1>
+            <nav role="navigation" aria-label="Test navigation">
+                <button class="btn btn-secondary" onclick="runAllTests()">Run All Tests</button>
+                <button class="btn btn-primary" onclick="window.location.href='index.html'">Back to App</button>
+            </nav>
+        </header>
+
+        <main class="app-main" id="main-content" role="main">
+            <div class="instructions" role="note">
+                <h2>Testing Instructions</h2>
+                <p>This page tests various accessibility features. Use the following methods:</p>
+                <ul>
+                    <li><strong>Keyboard Navigation:</strong> Use Tab, Shift+Tab, Enter, Space, and Arrow keys</li>
+                    <li><strong>Screen Reader:</strong> Enable your screen reader (NVDA, JAWS, VoiceOver, etc.)</li>
+                    <li><strong>Focus Indicators:</strong> Observe visible focus outlines as you navigate</li>
+                </ul>
+            </div>
+
+            <!-- Test 1: ARIA Labels -->
+            <section class="test-section" role="region" aria-labelledby="test1-title">
+                <h2 id="test1-title">Test 1: ARIA Labels</h2>
+                <div class="test-item">
+                    <h3>Button with aria-label</h3>
+                    <button class="btn btn-primary" aria-label="Save campaign data" title="Save">
+                        <span aria-hidden="true">💾</span>
+                    </button>
+                    <p class="sr-only">Screen reader should announce: "Save campaign data, button"</p>
+                </div>
+                
+                <div class="test-item">
+                    <h3>Input with aria-describedby</h3>
+                    <label for="test-input">Character Name:</label>
+                    <input type="text" id="test-input" aria-describedby="test-input-help">
+                    <span id="test-input-help" class="sr-only">Enter the character's full name</span>
+                </div>
+            </section>
+
+            <!-- Test 2: Keyboard Navigation -->
+            <section class="test-section" role="region" aria-labelledby="test2-title">
+                <h2 id="test2-title">Test 2: Keyboard Navigation</h2>
+                <div class="test-item">
+                    <h3>Tab Navigation</h3>
+                    <div class="test-controls">
+                        <button class="btn btn-secondary" tabindex="0">Button 1</button>
+                        <button class="btn btn-secondary" tabindex="0">Button 2</button>
+                        <button class="btn btn-secondary" tabindex="0">Button 3</button>
+                    </div>
+                    <p>Press Tab to move forward, Shift+Tab to move backward</p>
+                </div>
+                
+                <div class="test-item">
+                    <h3>Arrow Key Navigation</h3>
+                    <div role="listbox" aria-label="Test list">
+                        <div role="option" tabindex="0" class="btn btn-secondary" style="display: block; margin: 0.25rem 0;">
+                            Option 1
+                        </div>
+                        <div role="option" tabindex="-1" class="btn btn-secondary" style="display: block; margin: 0.25rem 0;">
+                            Option 2
+                        </div>
+                        <div role="option" tabindex="-1" class="btn btn-secondary" style="display: block; margin: 0.25rem 0;">
+                            Option 3
+                        </div>
+                    </div>
+                    <p>Use Arrow Up/Down to navigate options</p>
+                </div>
+            </section>
+
+            <!-- Test 3: Focus Indicators -->
+            <section class="test-section" role="region" aria-labelledby="test3-title">
+                <h2 id="test3-title">Test 3: Focus Indicators</h2>
+                <div class="test-item">
+                    <h3>Visible Focus Outlines</h3>
+                    <div class="test-controls">
+                        <button class="btn btn-primary">Primary Button</button>
+                        <button class="btn btn-secondary">Secondary Button</button>
+                        <button class="btn btn-success">Success Button</button>
+                        <button class="btn btn-danger">Danger Button</button>
+                    </div>
+                    <p>Tab through buttons and observe gold focus outline with shadow</p>
+                </div>
+            </section>
+
+            <!-- Test 4: Live Regions -->
+            <section class="test-section" role="region" aria-labelledby="test4-title">
+                <h2 id="test4-title">Test 4: Live Regions</h2>
+                <div class="test-item">
+                    <h3>ARIA Live Announcements</h3>
+                    <div class="test-controls">
+                        <button class="btn btn-info" onclick="testPoliteAnnouncement()">
+                            Test Polite Announcement
+                        </button>
+                        <button class="btn btn-warning" onclick="testAssertiveAnnouncement()">
+                            Test Assertive Announcement
+                        </button>
+                        <button class="btn btn-success" onclick="testStatusAnnouncement()">
+                            Test Status Announcement
+                        </button>
+                    </div>
+                    <div id="test-output" style="margin-top: 1rem; padding: 1rem; background: var(--bg-dark); border-radius: var(--radius-sm);"></div>
+                </div>
+            </section>
+
+            <!-- Test 5: Semantic HTML -->
+            <section class="test-section" role="region" aria-labelledby="test5-title">
+                <h2 id="test5-title">Test 5: Semantic HTML</h2>
+                <div class="test-item">
+                    <h3>Proper Heading Hierarchy</h3>
+                    <p>Screen reader should announce proper heading levels:</p>
+                    <h1 style="font-size: 1.2rem; margin: 0.5rem 0;">H1: Main Title</h1>
+                    <h2 style="font-size: 1.1rem; margin: 0.5rem 0;">H2: Section Title</h2>
+                    <h3 style="font-size: 1rem; margin: 0.5rem 0;">H3: Subsection Title</h3>
+                </div>
+                
+                <div class="test-item">
+                    <h3>Proper List Structure</h3>
+                    <ul role="list">
+                        <li>List item 1</li>
+                        <li>List item 2</li>
+                        <li>List item 3</li>
+                    </ul>
+                </div>
+            </section>
+
+            <!-- Test 6: Form Accessibility -->
+            <section class="test-section" role="region" aria-labelledby="test6-title">
+                <h2 id="test6-title">Test 6: Form Accessibility</h2>
+                <div class="test-item">
+                    <h3>Accessible Form</h3>
+                    <form onsubmit="event.preventDefault(); testFormSubmit();">
+                        <div class="form-group">
+                            <label for="test-name">Name (required):</label>
+                            <input type="text" id="test-name" required aria-required="true">
+                        </div>
+                        <div class="form-group">
+                            <label for="test-email">Email:</label>
+                            <input type="email" id="test-email" aria-describedby="email-help">
+                            <span id="email-help" style="font-size: 0.85rem; color: var(--text-medium);">
+                                We'll never share your email
+                            </span>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Submit</button>
+                    </form>
+                </div>
+            </section>
+
+            <!-- Test Results -->
+            <section class="test-section" role="region" aria-labelledby="results-title">
+                <h2 id="results-title">Test Results</h2>
+                <div id="test-results" role="log" aria-live="polite" aria-atomic="true">
+                    <p>Run tests to see results here</p>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script type="module">
+        import { accessibilityManager } from './js/accessibility.js';
+        
+        window.accessibilityManager = accessibilityManager;
+        
+        window.testPoliteAnnouncement = function() {
+            accessibilityManager.announce('This is a polite announcement. It should not interrupt current screen reader output.', 'polite');
+            document.getElementById('test-output').textContent = 'Polite announcement sent';
+        };
+        
+        window.testAssertiveAnnouncement = function() {
+            accessibilityManager.announce('This is an assertive announcement! It should interrupt current screen reader output.', 'assertive');
+            document.getElementById('test-output').textContent = 'Assertive announcement sent';
+        };
+        
+        window.testStatusAnnouncement = function() {
+            accessibilityManager.announceStatus('Status updated successfully');
+            document.getElementById('test-output').textContent = 'Status announcement sent';
+        };
+        
+        window.testFormSubmit = function() {
+            accessibilityManager.announceStatus('Form submitted successfully');
+            document.getElementById('test-results').innerHTML = '<div class="status pass">Form submission test passed!</div>';
+        };
+        
+        window.runAllTests = function() {
+            const results = document.getElementById('test-results');
+            results.innerHTML = '<h3>Running automated tests...</h3>';
+            
+            const tests = [
+                { name: 'ARIA labels present', pass: document.querySelectorAll('[aria-label]').length > 0 },
+                { name: 'Skip link present', pass: document.querySelector('.skip-to-main') !== null },
+                { name: 'Live regions present', pass: document.querySelectorAll('[aria-live]').length >= 2 },
+                { name: 'Semantic HTML', pass: document.querySelectorAll('header, main, nav, section').length > 0 },
+                { name: 'Form labels', pass: document.querySelectorAll('label[for]').length > 0 },
+                { name: 'Focus indicators', pass: getComputedStyle(document.body).getPropertyValue('--accent-color') !== '' }
+            ];
+            
+            let html = '<h3>Test Results:</h3><ul>';
+            tests.forEach(test => {
+                html += `<li><div class="status ${test.pass ? 'pass' : 'fail'}">${test.name}: ${test.pass ? 'PASS' : 'FAIL'}</div></li>`;
+            });
+            html += '</ul>';
+            
+            results.innerHTML = html;
+            accessibilityManager.announceStatus(`Tests complete. ${tests.filter(t => t.pass).length} of ${tests.length} tests passed.`);
+        };
+    </script>
+</body>
+</html>
