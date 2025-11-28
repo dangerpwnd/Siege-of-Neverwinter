@@ -91,6 +91,36 @@ async function runMigration(pool) {
   }
 }
 
+async function applyOptimizations(pool) {
+  logSection('Step 2.5: Applying Database Optimizations');
+  
+  try {
+    // Read optimization file
+    const optimizePath = path.join(__dirname, 'optimize-indexes.sql');
+    
+    if (!fs.existsSync(optimizePath)) {
+      logWarning('optimize-indexes.sql file not found, skipping optimizations');
+      return true; // Not critical, continue
+    }
+    
+    const optimizeSql = fs.readFileSync(optimizePath, 'utf8');
+    logInfo('Executing optimize-indexes.sql...');
+    
+    // Execute optimization SQL
+    await pool.query(optimizeSql);
+    
+    logSuccess('Database optimizations applied successfully');
+    logInfo('  • Composite indexes created');
+    logInfo('  • JSONB indexes added');
+    logInfo('  • Partial indexes created');
+    return true;
+  } catch (error) {
+    logError('Optimization failed');
+    logError(`Error: ${error.message}`);
+    return false;
+  }
+}
+
 async function performSanityChecks(pool) {
   logSection('Step 3: Performing Sanity Checks');
   
@@ -339,6 +369,12 @@ async function initializeDatabase() {
     const migrated = await runMigration(pool);
     if (!migrated) {
       return false;
+    }
+    
+    // Step 2.5: Apply optimizations
+    const optimized = await applyOptimizations(pool);
+    if (!optimized) {
+      logWarning('Optimizations failed, but continuing...');
     }
     
     // Step 3: Sanity checks
