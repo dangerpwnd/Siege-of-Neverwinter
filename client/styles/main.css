@@ -2886,3 +2886,152 @@ a {
     box-shadow: 0 0 20px rgba(229, 193, 88, 0.6);
   }
 }
+
+/* Character Features and Items Sections */
+.features-display,
+.items-display {
+    margin-top: 1.5rem;
+    padding: 1rem;
+    background: var(--bg-secondary);
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+}
+
+.features-display h4,
+.items-display h4 {
+    margin-top: 0;
+    margin-bottom: 1rem;
+    color: var(--text-primary);
+    font-size: 1rem;
+    font-weight: 600;
+}
+
+.feature-list,
+.item-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.feature-item,
+.item-entry {
+    padding: 0.75rem;
+    margin-bottom: 0.5rem;
+    background: var(--bg-primary);
+    border-radius: 6px;
+    border: 1px solid var(--border-color);
+}
+
+.feature-item:last-child,
+.item-entry:last-child {
+    margin-bottom: 0;
+}
+
+.feature-item strong,
+.item-entry strong {
+    display: block;
+    color: var(--text-primary);
+    font-size: 0.95rem;
+    margin-bottom: 0.25rem;
+}
+
+.feature-item p,
+.item-entry p {
+    margin: 0.25rem 0 0 0;
+    color: var(--text-secondary);
+    font-size: 0.875rem;
+    line-height: 1.4;
+}
+
+.attunement-badge {
+    display: inline-block;
+    margin-left: 0.5rem;
+    padding: 0.125rem 0.5rem;
+    background: var(--accent-color);
+    color: white;
+    font-size: 0.75rem;
+    font-weight: 600;
+    border-radius: 4px;
+    text-transform: uppercase;
+}
+
+.no-features,
+.no-items {
+    margin: 0;
+    padding: 0.75rem;
+    color: var(--text-muted);
+    font-style: italic;
+    text-align: center;
+    background: var(--bg-primary);
+    border-radius: 6px;
+}
+
+/* Form styling for features and items */
+.form-group textarea#char-features,
+.form-group textarea#char-items {
+    font-family: 'Courier New', monospace;
+    font-size: 0.875rem;
+    line-height: 1.5;
+}
+
+.form-group small {
+    display: block;
+    margin-top: 0.25rem;
+    color: var(--text-muted);
+    font-size: 0.75rem;
+}
+
+/* Character Background and Alignment Styling */
+.character-header .character-info {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-top: 0.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.character-class,
+.character-background,
+.character-alignment {
+    display: inline-block;
+    padding: 0.25rem 0.75rem;
+    border-radius: 4px;
+    font-size: 0.875rem;
+    font-weight: 500;
+}
+
+.character-class {
+    background: var(--accent-color);
+    color: white;
+}
+
+.character-background {
+    background: var(--bg-secondary);
+    color: var(--text-primary);
+    border: 1px solid var(--border-color);
+}
+
+.character-alignment {
+    background: var(--bg-tertiary, #f0f0f0);
+    color: var(--text-secondary);
+    border: 1px solid var(--border-color);
+    font-style: italic;
+}
+
+/* Form select styling */
+.form-group select {
+    width: 100%;
+    padding: 0.5rem;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    font-size: 0.875rem;
+    font-family: inherit;
+}
+
+.form-group select:focus {
+    outline: none;
+    border-color: var(--accent-color);
+    box-shadow: 0 0 0 2px rgba(var(--accent-color-rgb, 59, 130, 246), 0.1);
+}
