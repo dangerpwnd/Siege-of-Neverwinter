@@ -57,6 +57,20 @@ class InitiativeTracker {
                 this.updateHP(id, change);
             }
             
+            // Action buttons (add condition, add note)
+            if (e.target.closest('.action-btn')) {
+                e.preventDefault();
+                const btn = e.target.closest('.action-btn');
+                const id = parseInt(btn.dataset.id);
+                const action = btn.dataset.action;
+                
+                if (action === 'add-condition') {
+                    this.showAddConditionDialog(id);
+                } else if (action === 'add-note') {
+                    this.showAddNoteDialog(id);
+                }
+            }
+            
             // Next turn button
             if (e.target.id === 'next-turn-btn') {
                 e.preventDefault();
@@ -367,6 +381,19 @@ class InitiativeTracker {
                             </div>
                             ${this.getConditionIndicators(combatant.conditions)}
                         </div>
+                        <div class="initiative-actions">
+                            <button class="action-btn" data-id="${combatant.id}" data-action="add-condition" title="Add Condition">
+                                <span>+ Condition</span>
+                            </button>
+                            <button class="action-btn" data-id="${combatant.id}" data-action="add-note" title="Add Note">
+                                <span>+ Note</span>
+                            </button>
+                        </div>
+                        ${combatant.notes ? `
+                            <div class="combatant-notes">
+                                <strong>Notes:</strong> ${this.escapeHtml(combatant.notes)}
+                            </div>
+                        ` : ''}
                     </div>
                 `).join('')}
             </div>
@@ -597,6 +624,190 @@ class InitiativeTracker {
         } catch (error) {
             console.error('Failed to clear initiative:', error);
         }
+    }
+
+    /**
+     * Show dialog to add condition
+     */
+    showAddConditionDialog(combatantId) {
+        const combatant = state.getCombatantById(combatantId);
+        if (!combatant) return;
+        
+        const conditions = [
+            'Blinded', 'Charmed', 'Deafened', 'Frightened', 'Grappled',
+            'Incapacitated', 'Invisible', 'Paralyzed', 'Petrified',
+            'Poisoned', 'Prone', 'Restrained', 'Stunned', 'Unconscious',
+            'Exhaustion', 'Concentration'
+        ];
+        
+        const dialogHTML = `
+            <div class="modal-overlay" id="condition-modal">
+                <div class="modal-dialog modal-small">
+                    <div class="modal-header">
+                        <h3>Add Condition to ${this.escapeHtml(combatant.name)}</h3>
+                        <button class="modal-close" data-action="close-condition-modal">×</button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="condition-selection">
+                            ${conditions.map(cond => `
+                                <button class="condition-option" data-condition="${cond}">
+                                    ${cond}
+                                </button>
+                            `).join('')}
+                        </div>
+                        <div class="custom-condition">
+                            <label for="custom-condition-input">Or enter custom:</label>
+                            <input type="text" id="custom-condition-input" placeholder="Custom condition" />
+                            <button class="btn btn-primary" id="add-custom-condition">Add Custom</button>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button class="btn btn-secondary" data-action="close-condition-modal">Cancel</button>
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        const modalContainer = document.createElement('div');
+        modalContainer.innerHTML = dialogHTML;
+        document.body.appendChild(modalContainer.firstElementChild);
+        
+        this.setupConditionModalListeners(combatantId);
+    }
+
+    setupConditionModalListeners(combatantId) {
+        const modal = document.getElementById('condition-modal');
+        if (!modal) return;
+        
+        modal.addEventListener('click', (e) => {
+            if (e.target.id === 'condition-modal' || e.target.dataset.action === 'close-condition-modal') {
+                e.preventDefault();
+                modal.remove();
+            }
+        });
+        
+        const dialog = modal.querySelector('.modal-dialog');
+        if (dialog) {
+            dialog.addEventListener('click', (e) => e.stopPropagation());
+        }
+        
+        const conditionButtons = modal.querySelectorAll('.condition-option');
+        conditionButtons.forEach(btn => {
+            btn.addEventListener('click', async (e) => {
+                e.preventDefault();
+                const condition = btn.dataset.condition;
+                await this.addCondition(combatantId, condition);
+                modal.remove();
+            });
+        });
+        
+        const customBtn = document.getElementById('add-custom-condition');
+        if (customBtn) {
+            customBtn.addEventListener('click', async (e) => {
+                e.preventDefault();
+                const input = document.getElementById('custom-condition-input');
+                const condition = input.value.trim();
+                if (condition) {
+                    await this.addCondition(combatantId, condition);
+                    modal.remove();
+                }
+            });
+        }
+    }
+
+    async addCondition(combatantId, condition) {
+        try {
+            await api.post(`/combatants/${combatantId}/conditions`, { condition });
+            
+            const combatant = state.getCombatantById(combatantId);
+            if (combatant) {
+                const conditions = combatant.conditions || [];
+                conditions.push({ condition });
+                state.updateCombatant(combatantId, { conditions });
+            }
+            
+            this.render();
+        } catch (error) {
+            console.error('Failed to add condition:', error);
+            alert('Failed to add condition');
+        }
+    }
+
+    showAddNoteDialog(combatantId) {
+        const combatant = state.getCombatantById(combatantId);
+        if (!combatant) return;
+        
+        const currentNotes = combatant.notes || '';
+        
+        const dialogHTML = `
+            <div class="modal-overlay" id="note-modal">
+                <div class="modal-dialog">
+                    <div class="modal-header">
+                        <h3>Notes for ${this.escapeHtml(combatant.name)}</h3>
+                        <button class="modal-close" data-action="close-note-modal">×</button>
+                    </div>
+                    <div class="modal-body">
+                        <textarea id="note-textarea" rows="6" placeholder="Add notes about this combatant...">${this.escapeHtml(currentNotes)}</textarea>
+                    </div>
+                    <div class="modal-footer">
+                        <button class="btn btn-primary" id="save-note-btn">Save Note</button>
+                        <button class="btn btn-secondary" data-action="close-note-modal">Cancel</button>
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        const modalContainer = document.createElement('div');
+        modalContainer.innerHTML = dialogHTML;
+        document.body.appendChild(modalContainer.firstElementChild);
+        
+        this.setupNoteModalListeners(combatantId);
+    }
+
+    setupNoteModalListeners(combatantId) {
+        const modal = document.getElementById('note-modal');
+        if (!modal) return;
+        
+        modal.addEventListener('click', (e) => {
+            if (e.target.id === 'note-modal' || e.target.dataset.action === 'close-note-modal') {
+                e.preventDefault();
+                modal.remove();
+            }
+        });
+        
+        const dialog = modal.querySelector('.modal-dialog');
+        if (dialog) {
+            dialog.addEventListener('click', (e) => e.stopPropagation());
+        }
+        
+        const saveBtn = document.getElementById('save-note-btn');
+        if (saveBtn) {
+            saveBtn.addEventListener('click', async (e) => {
+                e.preventDefault();
+                const textarea = document.getElementById('note-textarea');
+                const notes = textarea.value.trim();
+                await this.saveNote(combatantId, notes);
+                modal.remove();
+            });
+        }
+    }
+
+    async saveNote(combatantId, notes) {
+        try {
+            await api.put(`/initiative/${combatantId}`, { notes });
+            state.updateCombatant(combatantId, { notes });
+            this.render();
+        } catch (error) {
+            console.error('Failed to save note:', error);
+            alert('Failed to save note');
+        }
+    }
+
+    escapeHtml(text) {
+        if (!text) return '';
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
     }
 }
 
