@@ -151,22 +151,21 @@ class NPCPanel {
         const isDown = npc.current_hp === 0;
         
         return `
-            <div class="npc-detail ${isDown ? 'npc-down' : ''}">
-                <div class="npc-header">
+            <div class="character-detail ${isDown ? 'character-down' : ''}">
+                <div class="character-header">
                     <h3>${this.escapeHtml(npc.name)}</h3>
-                    <span class="combatant-type-badge npc-badge">NPC</span>
-                    ${npc.character_class && npc.level ? 
-                        `<span class="npc-class">${this.escapeHtml(npc.character_class)} ${npc.level}</span>` 
-                        : ''}
-                    <div class="npc-actions">
-                        <button id="edit-npc-btn" class="btn btn-small">Edit</button>
-                        <button id="delete-npc-btn" class="btn btn-small btn-danger">Delete</button>
+                    <div class="character-info">
+                        <span class="character-type-badge npc-badge">NPC</span>
+                        ${npc.character_class && npc.level ? 
+                            `<span class="character-class">${this.escapeHtml(npc.character_class)} ${npc.level}</span>` 
+                            : ''}
                     </div>
+                    <button id="edit-npc-btn" class="btn btn-small">Edit</button>
                 </div>
                 
                 ${isDown ? '<div class="down-indicator">⚠️ DOWN</div>' : ''}
                 
-                <div class="npc-stats">
+                <div class="character-stats">
                     <div class="stat-block">
                         <label>AC</label>
                         <div class="stat-value">${npc.ac}</div>
@@ -237,13 +236,13 @@ class NPCPanel {
                 </div>
                 
                 ${npc.notes ? `
-                    <div class="npc-notes">
+                    <div class="character-notes">
                         <h4>Notes</h4>
                         <p>${this.escapeHtml(npc.notes)}</p>
                     </div>
                 ` : ''}
                 
-                <div class="npc-combat-actions">
+                <div class="character-combat-actions">
                     <button class="btn btn-primary add-to-combat-btn" data-npc-id="${npc.id}">
                         Add to Combat
                     </button>
@@ -543,24 +542,24 @@ class NPCPanel {
         const selectedNPC = this.getSelectedNPC();
         
         this.container.innerHTML = `
-            <div class="npc-panel">
-                <div class="npc-list-section">
+            <div class="character-panel">
+                <div class="character-list-section">
                     <div class="section-header">
                         <h3>NPCs</h3>
                         <button id="create-npc-btn" class="btn btn-small btn-primary">+ New</button>
                     </div>
-                    <ul class="npc-list">
+                    <ul class="character-list">
                         ${npcs.length > 0 ? npcs.map(npc => `
-                            <li class="npc-list-item ${selectedNPC?.id === npc.id ? 'selected' : ''}" 
+                            <li class="character-list-item ${selectedNPC?.id === npc.id ? 'selected' : ''}" 
                                 data-npc-id="${npc.id}">
-                                <span class="npc-name">${this.escapeHtml(npc.name)}</span>
-                                <span class="npc-hp ${npc.current_hp === 0 ? 'hp-zero' : ''}">${npc.current_hp}/${npc.max_hp}</span>
+                                <span class="char-name">${this.escapeHtml(npc.name)}</span>
+                                <span class="char-hp ${npc.current_hp === 0 ? 'hp-zero' : ''}">${npc.current_hp}/${npc.max_hp}</span>
                             </li>
-                        `).join('') : '<li class="no-npcs">No NPCs yet</li>'}
+                        `).join('') : '<li class="no-characters">No NPCs yet</li>'}
                     </ul>
                 </div>
                 
-                <div class="npc-detail-section">
+                <div class="character-detail-section">
                     ${this.displayNPC(selectedNPC)}
                 </div>
             </div>
