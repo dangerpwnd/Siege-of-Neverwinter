@@ -3,6 +3,8 @@
 ## Overview
 
 The character panel now includes enhanced character information:
+- **Class**: Character class from D&D 5e (Barbarian, Wizard, etc.)
+- **Subclass**: Character subclass/archetype (dynamically populated based on class)
 - **Background**: Character background (Entertainer, Acolyte, etc.)
 - **Alignment**: Character alignment (Lawful Good, Chaotic Neutral, etc.)
 - **Class & Racial Features**: Track special abilities, racial traits, and class features
@@ -11,6 +13,8 @@ The character panel now includes enhanced character information:
 ## Database Changes
 
 Added new columns to the `combatants` table:
+- `character_class`: VARCHAR(100) - Character class (now uses dropdown)
+- `subclass`: VARCHAR(100) - Character subclass/archetype
 - `background`: VARCHAR(100) - Character background
 - `alignment`: VARCHAR(50) - Character alignment
 - `features`: JSONB - Array of feature objects with `name` and `description`
@@ -19,6 +23,7 @@ Added new columns to the `combatants` table:
 Migration files:
 - `database/add-features-items.sql`
 - `database/add-background-alignment.sql`
+- `database/add-subclass.sql`
 
 ## Usage
 
@@ -26,8 +31,25 @@ Migration files:
 
 When creating or editing a character, you can now specify:
 
+**Class:**
+Dropdown selection with all 13 D&D 5e classes:
+- Artificer, Barbarian, Bard, Cleric, Druid, Fighter, Monk, Paladin, Ranger, Rogue, Sorcerer, Warlock, Wizard
+
+**Subclass:**
+Dynamic dropdown that populates based on selected class. Includes all official subclasses from:
+- Player's Handbook
+- Xanathar's Guide to Everything
+- Tasha's Cauldron of Everything
+- Other official sources
+
+Examples:
+- Barbarian: Path of the Berserker, Path of the Totem Warrior, Path of the Zealot, etc.
+- Wizard: School of Evocation, Bladesinging, Order of Scribes, etc.
+- Fighter: Champion, Battle Master, Eldritch Knight, Echo Knight, etc.
+
 **Background:**
-Free-form text field for character background (e.g., "Entertainer", "Acolyte", "Folk Hero")
+Dropdown selection with 13 core D&D 5e backgrounds:
+- Acolyte, Charlatan, Criminal, Entertainer, Folk Hero, Guild Artisan, Hermit, Noble, Outlander, Sage, Sailor, Soldier, Urchin
 
 **Alignment:**
 Dropdown selection with standard D&D alignments:
@@ -65,7 +87,8 @@ Cloak of Elvenkind | Advantage on Stealth checks | yes
 ### Display
 
 Character information is displayed in the character detail view:
-- **Header**: Shows character name with class/level, background, and alignment as badges
+- **Header**: Shows character name with class/level (subclass), background, and alignment as badges
+  - Example: "Fighter 5 (Battle Master)"
 - **Features**: Show the name in bold with the description below
 - **Items**: Show the name in bold with an "ATTUNEMENT" badge if required
 - Empty sections show a placeholder message
@@ -74,6 +97,8 @@ Character information is displayed in the character detail view:
 
 ### POST /api/characters
 Added optional fields:
+- `character_class`: String - Character class
+- `subclass`: String - Character subclass
 - `background`: String - Character background
 - `alignment`: String - Character alignment
 - `features`: Array of `{ name: string, description: string }`
@@ -81,6 +106,8 @@ Added optional fields:
 
 ### PUT /api/characters/:id
 Added optional fields:
+- `character_class`: String - Character class
+- `subclass`: String - Character subclass
 - `background`: String - Character background
 - `alignment`: String - Character alignment
 - `features`: Array of `{ name: string, description: string }`
