@@ -3886,3 +3886,31 @@ a {
 .condition-badge:hover .condition-remove {
     opacity: 1;
 }
+
+/* Delete Button Styling */
+.btn-danger {
+    background-color: var(--danger-color);
+    color: var(--text-light);
+    border: 1px solid var(--danger-hover);
+    margin-left: auto;
+}
+
+.btn-danger:hover {
+    background-color: var(--danger-hover);
+    border-color: var(--danger-hover);
+}
+
+.btn-danger:active {
+    background-color: #d44a3e;
+}
+
+/* Form Actions Layout */
+.form-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+.form-actions .btn-danger {
+    margin-left: auto;
+}
