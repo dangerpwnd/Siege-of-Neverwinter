@@ -109,6 +109,13 @@ class CharacterPanel {
                 this.showEditForm();
             }
             
+            // Delete character button
+            if (e.target.closest('#delete-character-btn')) {
+                const btn = e.target.closest('#delete-character-btn');
+                const characterId = parseInt(btn.dataset.characterId);
+                this.deleteCharacter(characterId);
+            }
+            
             // Add to combat button
             if (e.target.closest('.add-to-combat-btn')) {
                 const btn = e.target.closest('.add-to-combat-btn');
@@ -776,6 +783,7 @@ class CharacterPanel {
                     <div class="form-actions">
                         <button type="button" id="save-character-btn" class="btn btn-primary">Save Changes</button>
                         <button type="button" id="cancel-character-btn" class="btn btn-secondary">Cancel</button>
+                        <button type="button" id="delete-character-btn" class="btn btn-danger" data-character-id="${character.id}">Delete Character</button>
                     </div>
                 </form>
             </div>
@@ -819,29 +827,83 @@ class CharacterPanel {
                 type: 'PC'
             };
             
-            console.log('Saving character:', isEdit ? 'EDIT' : 'CREATE', characterData);
+            console.log('=== SAVING CHARACTER ===');
+            console.log('Mode:', isEdit ? 'EDIT' : 'CREATE');
+            console.log('Data:', JSON.stringify(characterData, null, 2));
             
             let character;
             if (isEdit) {
+                console.log('Calling api.updateCharacter...');
                 character = await api.updateCharacter(characterId, characterData);
-                console.log('Character updated:', character);
+                console.log('Character updated successfully:', character);
                 state.updateCharacter(parseInt(characterId), character);
                 state.updateCombatant(parseInt(characterId), character);
             } else {
+                console.log('Calling api.createCharacter...');
                 character = await api.createCharacter(characterData);
-                console.log('Character created:', character);
+                console.log('Character created successfully:', character);
+                
+                if (!character || !character.id) {
+                    throw new Error('Invalid response from server - no character ID returned');
+                }
+                
                 state.addCharacter(character);
+                console.log('Character added to state');
             }
             
             this.selectedCharacterId = character.id;
             console.log('Reloading characters from database...');
-            await this.loadCharacters(); // Reload to ensure sync
-            console.log('Characters after reload:', state.get('characters'));
+            await this.loadCharacters();
+            const chars = state.get('characters');
+            console.log(`Characters after reload: ${chars.length} characters`);
+            console.log('Character IDs:', chars.map(c => c.id));
+            this.render();
+            console.log('=== SAVE COMPLETE ===');
+        } catch (error) {
+            console.error('=== SAVE FAILED ===');
+            console.error('Error:', error);
+            console.error('Message:', error.message);
+            console.error('Stack:', error.stack);
+            alert(`Failed to save character: ${error.message}\n\nCheck console for details.`);
+            this.showError(`Failed to save character: ${error.message}`);
+        }
+    }
+
+    async deleteCharacter(characterId) {
+        try {
+            const character = state.getCharacterById(characterId);
+            if (!character) {
+                this.showError('Character not found');
+                return;
+            }
+            
+            // Confirm deletion
+            if (!confirm(`Are you sure you want to delete ${character.name}? This cannot be undone.`)) {
+                return;
+            }
+            
+            console.log('Deleting character:', character.name, 'ID:', characterId);
+            
+            // Delete from database
+            await api.deleteCharacter(characterId);
+            
+            // Remove from state
+            const characters = state.get('characters').filter(c => c.id !== characterId);
+            state.setState({ characters });
+            
+            // Also remove from combatants if present
+            const combatants = state.get('combatants').filter(c => c.id !== characterId);
+            state.setState({ combatants });
+            
+            // Clear selection
+            this.selectedCharacterId = null;
+            state.clearSelection();
+            
+            this.showSuccess(`${character.name} deleted successfully`);
             this.render();
         } catch (error) {
-            console.error('Failed to save character:', error);
-            console.error('Error details:', error.message, error.stack);
-            this.showError(`Failed to save character: ${error.message}`);
+            console.error('Failed to delete character:', error);
+            this.showError(`Failed to delete character: ${error.message}`);
         }
     }
 
