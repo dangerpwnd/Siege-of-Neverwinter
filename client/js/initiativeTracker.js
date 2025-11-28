@@ -161,6 +161,7 @@ class InitiativeTracker {
             }
         } catch (error) {
             console.error('Failed to load initiative:', error);
+            // Don't clear existing combatants on error
         }
     }
 
@@ -573,13 +574,18 @@ class InitiativeTracker {
                 const initiative = prompt(`Enter initiative for ${character.name}:`, '10');
                 if (initiative === null) return;
                 
-                await api.post('/initiative', {
-                    campaign_id: state.get('currentCampaignId'),
-                    combatant_id: id,
+                // Update the character's initiative (characters already exist in combatants table)
+                const response = await api.put(`/characters/${id}`, {
                     initiative: parseInt(initiative) || 0
                 });
                 
-                state.addCombatant({ ...character, initiative: parseInt(initiative) || 0 });
+                // Add updated character to initiative tracker state
+                if (response) {
+                    const updatedCharacter = { ...character, initiative: parseInt(initiative) || 0 };
+                    state.addCombatant(updatedCharacter);
+                    // Also update in characters list
+                    state.updateCharacter(id, { initiative: parseInt(initiative) || 0 });
+                }
                 
             } else if (type === 'monster') {
                 const monsters = state.get('monsters') || [];
@@ -608,6 +614,7 @@ class InitiativeTracker {
         } catch (error) {
             console.error('Failed to add combatant:', error);
             alert('Failed to add combatant. Please try again.');
+            // Don't modify state on error - existing combatants remain
         }
     }
 
