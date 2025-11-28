@@ -79,7 +79,11 @@ router.post('/', async (req, res, next) => {
       save_charisma = 0,
       character_class,
       level,
-      notes = ''
+      background,
+      alignment,
+      notes = '',
+      features = [],
+      magical_items = []
     } = req.body;
     
     // Validate required fields
@@ -94,14 +98,14 @@ router.post('/', async (req, res, next) => {
         campaign_id, name, type, initiative, ac, current_hp, max_hp,
         save_strength, save_dexterity, save_constitution,
         save_intelligence, save_wisdom, save_charisma,
-        character_class, level, notes
-      ) VALUES ($1, $2, 'PC', $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)
+        character_class, level, background, alignment, notes, features, magical_items
+      ) VALUES ($1, $2, 'PC', $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19)
       RETURNING *`,
       [
         campaign_id, name, initiative, ac, current_hp, max_hp,
         save_strength, save_dexterity, save_constitution,
         save_intelligence, save_wisdom, save_charisma,
-        character_class, level, notes
+        character_class, level, background, alignment, notes, JSON.stringify(features), JSON.stringify(magical_items)
       ]
     );
     
@@ -132,6 +136,8 @@ router.put('/:id', async (req, res, next) => {
       save_charisma,
       character_class,
       level,
+      background,
+      alignment,
       notes
     } = req.body;
     
@@ -192,9 +198,25 @@ router.put('/:id', async (req, res, next) => {
       updates.push(`level = $${paramCount++}`);
       values.push(level);
     }
+    if (background !== undefined) {
+      updates.push(`background = $${paramCount++}`);
+      values.push(background);
+    }
+    if (alignment !== undefined) {
+      updates.push(`alignment = $${paramCount++}`);
+      values.push(alignment);
+    }
     if (notes !== undefined) {
       updates.push(`notes = $${paramCount++}`);
       values.push(notes);
+    }
+    if (req.body.features !== undefined) {
+      updates.push(`features = $${paramCount++}`);
+      values.push(JSON.stringify(req.body.features));
+    }
+    if (req.body.magical_items !== undefined) {
+      updates.push(`magical_items = $${paramCount++}`);
+      values.push(JSON.stringify(req.body.magical_items));
     }
     
     if (updates.length === 0) {
