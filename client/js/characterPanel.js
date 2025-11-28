@@ -173,6 +173,9 @@ class CharacterPanel {
                 <div class="character-header">
                     <h3>${this.escapeHtml(character.name)}</h3>
                     <div class="character-info">
+                        ${character.race ? 
+                            `<span class="character-race">${this.escapeHtml(character.race)}</span>` 
+                            : ''}
                         ${character.character_class && character.level ? 
                             `<span class="character-class">${this.escapeHtml(character.character_class)} ${character.level}${character.subclass ? ` (${this.escapeHtml(character.subclass)})` : ''}</span>` 
                             : ''}
@@ -292,6 +295,81 @@ class CharacterPanel {
                     <div class="form-group">
                         <label for="char-name">Name *</label>
                         <input type="text" id="char-name" required />
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="char-race">Race</label>
+                        <select id="char-race">
+                            <option value="">Select race</option>
+                            <optgroup label="Dragonborn">
+                                <option value="Dragonborn">Dragonborn</option>
+                            </optgroup>
+                            <optgroup label="Dwarf">
+                                <option value="Hill Dwarf">Hill Dwarf</option>
+                                <option value="Mountain Dwarf">Mountain Dwarf</option>
+                                <option value="Duergar">Duergar</option>
+                            </optgroup>
+                            <optgroup label="Elf">
+                                <option value="High Elf">High Elf</option>
+                                <option value="Wood Elf">Wood Elf</option>
+                                <option value="Dark Elf (Drow)">Dark Elf (Drow)</option>
+                                <option value="Eladrin">Eladrin</option>
+                                <option value="Sea Elf">Sea Elf</option>
+                                <option value="Shadar-kai">Shadar-kai</option>
+                            </optgroup>
+                            <optgroup label="Gnome">
+                                <option value="Forest Gnome">Forest Gnome</option>
+                                <option value="Rock Gnome">Rock Gnome</option>
+                                <option value="Deep Gnome">Deep Gnome</option>
+                            </optgroup>
+                            <optgroup label="Half-Elf">
+                                <option value="Half-Elf">Half-Elf</option>
+                            </optgroup>
+                            <optgroup label="Half-Orc">
+                                <option value="Half-Orc">Half-Orc</option>
+                            </optgroup>
+                            <optgroup label="Halfling">
+                                <option value="Lightfoot Halfling">Lightfoot Halfling</option>
+                                <option value="Stout Halfling">Stout Halfling</option>
+                                <option value="Ghostwise Halfling">Ghostwise Halfling</option>
+                            </optgroup>
+                            <optgroup label="Human">
+                                <option value="Human">Human</option>
+                                <option value="Variant Human">Variant Human</option>
+                            </optgroup>
+                            <optgroup label="Tiefling">
+                                <option value="Tiefling">Tiefling</option>
+                            </optgroup>
+                            <optgroup label="Aasimar">
+                                <option value="Protector Aasimar">Protector Aasimar</option>
+                                <option value="Scourge Aasimar">Scourge Aasimar</option>
+                                <option value="Fallen Aasimar">Fallen Aasimar</option>
+                            </optgroup>
+                            <optgroup label="Firbolg">
+                                <option value="Firbolg">Firbolg</option>
+                            </optgroup>
+                            <optgroup label="Genasi">
+                                <option value="Air Genasi">Air Genasi</option>
+                                <option value="Earth Genasi">Earth Genasi</option>
+                                <option value="Fire Genasi">Fire Genasi</option>
+                                <option value="Water Genasi">Water Genasi</option>
+                            </optgroup>
+                            <optgroup label="Goliath">
+                                <option value="Goliath">Goliath</option>
+                            </optgroup>
+                            <optgroup label="Kenku">
+                                <option value="Kenku">Kenku</option>
+                            </optgroup>
+                            <optgroup label="Lizardfolk">
+                                <option value="Lizardfolk">Lizardfolk</option>
+                            </optgroup>
+                            <optgroup label="Tabaxi">
+                                <option value="Tabaxi">Tabaxi</option>
+                            </optgroup>
+                            <optgroup label="Triton">
+                                <option value="Triton">Triton</option>
+                            </optgroup>
+                        </select>
                     </div>
                     
                     <div class="form-row">
@@ -450,6 +528,81 @@ class CharacterPanel {
                         <input type="text" id="char-name" value="${this.escapeHtml(character.name)}" required />
                     </div>
                     
+                    <div class="form-group">
+                        <label for="char-race">Race</label>
+                        <select id="char-race">
+                            <option value="">Select race</option>
+                            <optgroup label="Dragonborn">
+                                <option value="Dragonborn" ${character.race === 'Dragonborn' ? 'selected' : ''}>Dragonborn</option>
+                            </optgroup>
+                            <optgroup label="Dwarf">
+                                <option value="Hill Dwarf" ${character.race === 'Hill Dwarf' ? 'selected' : ''}>Hill Dwarf</option>
+                                <option value="Mountain Dwarf" ${character.race === 'Mountain Dwarf' ? 'selected' : ''}>Mountain Dwarf</option>
+                                <option value="Duergar" ${character.race === 'Duergar' ? 'selected' : ''}>Duergar</option>
+                            </optgroup>
+                            <optgroup label="Elf">
+                                <option value="High Elf" ${character.race === 'High Elf' ? 'selected' : ''}>High Elf</option>
+                                <option value="Wood Elf" ${character.race === 'Wood Elf' ? 'selected' : ''}>Wood Elf</option>
+                                <option value="Dark Elf (Drow)" ${character.race === 'Dark Elf (Drow)' ? 'selected' : ''}>Dark Elf (Drow)</option>
+                                <option value="Eladrin" ${character.race === 'Eladrin' ? 'selected' : ''}>Eladrin</option>
+                                <option value="Sea Elf" ${character.race === 'Sea Elf' ? 'selected' : ''}>Sea Elf</option>
+                                <option value="Shadar-kai" ${character.race === 'Shadar-kai' ? 'selected' : ''}>Shadar-kai</option>
+                            </optgroup>
+                            <optgroup label="Gnome">
+                                <option value="Forest Gnome" ${character.race === 'Forest Gnome' ? 'selected' : ''}>Forest Gnome</option>
+                                <option value="Rock Gnome" ${character.race === 'Rock Gnome' ? 'selected' : ''}>Rock Gnome</option>
+                                <option value="Deep Gnome" ${character.race === 'Deep Gnome' ? 'selected' : ''}>Deep Gnome</option>
+                            </optgroup>
+                            <optgroup label="Half-Elf">
+                                <option value="Half-Elf" ${character.race === 'Half-Elf' ? 'selected' : ''}>Half-Elf</option>
+                            </optgroup>
+                            <optgroup label="Half-Orc">
+                                <option value="Half-Orc" ${character.race === 'Half-Orc' ? 'selected' : ''}>Half-Orc</option>
+                            </optgroup>
+                            <optgroup label="Halfling">
+                                <option value="Lightfoot Halfling" ${character.race === 'Lightfoot Halfling' ? 'selected' : ''}>Lightfoot Halfling</option>
+                                <option value="Stout Halfling" ${character.race === 'Stout Halfling' ? 'selected' : ''}>Stout Halfling</option>
+                                <option value="Ghostwise Halfling" ${character.race === 'Ghostwise Halfling' ? 'selected' : ''}>Ghostwise Halfling</option>
+                            </optgroup>
+                            <optgroup label="Human">
+                                <option value="Human" ${character.race === 'Human' ? 'selected' : ''}>Human</option>
+                                <option value="Variant Human" ${character.race === 'Variant Human' ? 'selected' : ''}>Variant Human</option>
+                            </optgroup>
+                            <optgroup label="Tiefling">
+                                <option value="Tiefling" ${character.race === 'Tiefling' ? 'selected' : ''}>Tiefling</option>
+                            </optgroup>
+                            <optgroup label="Aasimar">
+                                <option value="Protector Aasimar" ${character.race === 'Protector Aasimar' ? 'selected' : ''}>Protector Aasimar</option>
+                                <option value="Scourge Aasimar" ${character.race === 'Scourge Aasimar' ? 'selected' : ''}>Scourge Aasimar</option>
+                                <option value="Fallen Aasimar" ${character.race === 'Fallen Aasimar' ? 'selected' : ''}>Fallen Aasimar</option>
+                            </optgroup>
+                            <optgroup label="Firbolg">
+                                <option value="Firbolg" ${character.race === 'Firbolg' ? 'selected' : ''}>Firbolg</option>
+                            </optgroup>
+                            <optgroup label="Genasi">
+                                <option value="Air Genasi" ${character.race === 'Air Genasi' ? 'selected' : ''}>Air Genasi</option>
+                                <option value="Earth Genasi" ${character.race === 'Earth Genasi' ? 'selected' : ''}>Earth Genasi</option>
+                                <option value="Fire Genasi" ${character.race === 'Fire Genasi' ? 'selected' : ''}>Fire Genasi</option>
+                                <option value="Water Genasi" ${character.race === 'Water Genasi' ? 'selected' : ''}>Water Genasi</option>
+                            </optgroup>
+                            <optgroup label="Goliath">
+                                <option value="Goliath" ${character.race === 'Goliath' ? 'selected' : ''}>Goliath</option>
+                            </optgroup>
+                            <optgroup label="Kenku">
+                                <option value="Kenku" ${character.race === 'Kenku' ? 'selected' : ''}>Kenku</option>
+                            </optgroup>
+                            <optgroup label="Lizardfolk">
+                                <option value="Lizardfolk" ${character.race === 'Lizardfolk' ? 'selected' : ''}>Lizardfolk</option>
+                            </optgroup>
+                            <optgroup label="Tabaxi">
+                                <option value="Tabaxi" ${character.race === 'Tabaxi' ? 'selected' : ''}>Tabaxi</option>
+                            </optgroup>
+                            <optgroup label="Triton">
+                                <option value="Triton" ${character.race === 'Triton' ? 'selected' : ''}>Triton</option>
+                            </optgroup>
+                        </select>
+                    </div>
+                    
                     <div class="form-row">
                         <div class="form-group">
                             <label for="char-class">Class</label>
@@ -605,6 +758,7 @@ class CharacterPanel {
             const characterData = {
                 campaign_id: state.get('currentCampaignId'),
                 name: document.getElementById('char-name').value,
+                race: document.getElementById('char-race').value,
                 character_class: document.getElementById('char-class').value,
                 subclass: document.getElementById('char-subclass').value,
                 level: parseInt(document.getElementById('char-level').value) || 1,
