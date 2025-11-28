@@ -847,6 +847,58 @@ class CharacterPanel {
         this.render();
     }
 
+    async saveCharacter() {
+        try {
+            const characterId = document.getElementById('char-id')?.value;
+            const isEdit = !!characterId;
+            
+            const featuresText = document.getElementById('char-features')?.value || '';
+            const itemsText = document.getElementById('char-items')?.value || '';
+            
+            const characterData = {
+                campaign_id: state.get('currentCampaignId'),
+                name: document.getElementById('char-name').value,
+                race: document.getElementById('char-race')?.value || '',
+                character_class: document.getElementById('char-class')?.value || '',
+                subclass: document.getElementById('char-subclass')?.value || '',
+                level: parseInt(document.getElementById('char-level')?.value) || 1,
+                background: document.getElementById('char-background')?.value || '',
+                alignment: document.getElementById('char-alignment')?.value || '',
+                ac: parseInt(document.getElementById('char-ac').value),
+                max_hp: parseInt(document.getElementById('char-max-hp').value),
+                current_hp: isEdit ? undefined : parseInt(document.getElementById('char-max-hp').value),
+                initiative: parseInt(document.getElementById('char-initiative')?.value) || 0,
+                save_strength: parseInt(document.getElementById('char-save-str')?.value) || 0,
+                save_dexterity: parseInt(document.getElementById('char-save-dex')?.value) || 0,
+                save_constitution: parseInt(document.getElementById('char-save-con')?.value) || 0,
+                save_intelligence: parseInt(document.getElementById('char-save-int')?.value) || 0,
+                save_wisdom: parseInt(document.getElementById('char-save-wis')?.value) || 0,
+                save_charisma: parseInt(document.getElementById('char-save-cha')?.value) || 0,
+                notes: document.getElementById('char-notes')?.value || '',
+                features: this.parseFeaturesFromForm(featuresText),
+                magical_items: this.parseItemsFromForm(itemsText),
+                type: 'PC'
+            };
+            
+            let character;
+            if (isEdit) {
+                character = await api.updateCharacter(characterId, characterData);
+                state.updateCharacter(parseInt(characterId), character);
+                state.updateCombatant(parseInt(characterId), character);
+            } else {
+                character = await api.createCharacter(characterData);
+                state.addCharacter(character);
+            }
+            
+            this.selectedCharacterId = character.id;
+            await this.loadCharacters(); // Reload to ensure sync
+            this.render();
+        } catch (error) {
+            console.error('Failed to save character:', error);
+            this.showError('Failed to save character');
+        }
+    }
+
     async addToCombat(characterId) {
         try {
             const character = state.getCharacterById(characterId);
