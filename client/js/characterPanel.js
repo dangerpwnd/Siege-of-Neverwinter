@@ -18,6 +18,7 @@ class CharacterPanel {
 
     async init() {
         await this.loadReferenceData();
+        await this.loadCharacters();
         this.render();
         this.setupEventListeners();
         
@@ -49,6 +50,23 @@ class CharacterPanel {
             };
         } catch (error) {
             console.error('Failed to load reference data:', error);
+        }
+    }
+
+    async loadCharacters() {
+        try {
+            const campaignId = state.get('currentCampaignId');
+            const characters = await api.get(`/characters?campaign_id=${campaignId}`);
+            
+            if (Array.isArray(characters)) {
+                state.setState({ characters });
+            } else {
+                console.error('Invalid characters response:', characters);
+                state.setState({ characters: [] });
+            }
+        } catch (error) {
+            console.error('Failed to load characters:', error);
+            this.showError('Failed to load characters');
         }
     }
 
