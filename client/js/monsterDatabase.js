@@ -17,6 +17,7 @@ class MonsterDatabase {
     }
 
     init() {
+        this.setupEventListeners();
         this.render();
         this.loadMonsters();
         
@@ -335,6 +336,50 @@ class MonsterDatabase {
     }
 
     /**
+     * Setup event listeners (called once during init)
+     */
+    setupEventListeners() {
+        // Use event delegation on container - only set up once
+        this.container.addEventListener('click', (e) => {
+            const action = e.target.dataset.action;
+            
+            if (action === 'add-monster') {
+                e.preventDefault();
+                this.showAddMonsterForm();
+            } else if (action === 'save-monster') {
+                e.preventDefault();
+                this.saveMonster();
+            } else if (action === 'cancel-form') {
+                e.preventDefault();
+                this.clearSelection();
+                this.render();
+            } else if (action === 'create-instance') {
+                e.preventDefault();
+                const monsterId = parseInt(e.target.dataset.id);
+                this.showCreateInstanceForm(monsterId);
+            } else if (action === 'delete-monster') {
+                e.preventDefault();
+                const monsterId = parseInt(e.target.dataset.id);
+                this.deleteMonster(monsterId);
+            } else if (action === 'back') {
+                e.preventDefault();
+                this.clearSelection();
+            } else if (e.target.closest('.monster-list-item')) {
+                const item = e.target.closest('.monster-list-item');
+                const monsterId = parseInt(item.dataset.id);
+                this.selectMonster(monsterId);
+            }
+        });
+
+        // Handle search input with event delegation
+        this.container.addEventListener('input', (e) => {
+            if (e.target.id === 'monster-search') {
+                this.searchMonsters(e.target.value);
+            }
+        });
+    }
+
+    /**
      * Render the monster database
      */
     render() {
@@ -356,36 +401,7 @@ class MonsterDatabase {
                     ${this.renderMonsterList()}
                 </div>
             `;
-
-            // Add search listener
-            const searchInput = document.getElementById('monster-search');
-            if (searchInput) {
-                searchInput.addEventListener('input', (e) => {
-                    this.searchMonsters(e.target.value);
-                });
-            }
         }
-
-        // Add event listeners
-        this.container.addEventListener('click', (e) => {
-            const action = e.target.dataset.action;
-            
-            if (action === 'add-monster') {
-                this.showAddMonsterForm();
-            } else if (action === 'create-instance') {
-                const monsterId = parseInt(e.target.dataset.id);
-                this.showCreateInstanceForm(monsterId);
-            } else if (action === 'delete-monster') {
-                const monsterId = parseInt(e.target.dataset.id);
-                this.deleteMonster(monsterId);
-            } else if (action === 'back') {
-                this.clearSelection();
-            } else if (e.target.closest('.monster-list-item')) {
-                const item = e.target.closest('.monster-list-item');
-                const monsterId = parseInt(item.dataset.id);
-                this.selectMonster(monsterId);
-            }
-        });
     }
 
     /**
@@ -464,16 +480,12 @@ class MonsterDatabase {
                     </div>
                     
                     <div class="form-actions">
-                        <button type="button" id="save-monster-btn" class="btn btn-primary">Create Monster</button>
-                        <button type="button" id="cancel-monster-btn" class="btn btn-secondary">Cancel</button>
+                        <button type="button" data-action="save-monster" class="btn btn-primary">Create Monster</button>
+                        <button type="button" data-action="cancel-form" class="btn btn-secondary">Cancel</button>
                     </div>
                 </form>
             </div>
         `;
-
-        // Add event listeners
-        document.getElementById('save-monster-btn').addEventListener('click', () => this.saveMonster());
-        document.getElementById('cancel-monster-btn').addEventListener('click', () => this.render());
     }
 
     /**
