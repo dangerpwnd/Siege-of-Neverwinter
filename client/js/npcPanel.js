@@ -67,6 +67,13 @@ class NPCPanel {
             if (e.target.closest('#delete-npc-btn')) {
                 this.deleteNPC();
             }
+            
+            // Add to combat button
+            if (e.target.closest('.add-to-combat-btn')) {
+                const btn = e.target.closest('.add-to-combat-btn');
+                const npcId = parseInt(btn.dataset.npcId);
+                this.addToCombat(npcId);
+            }
         });
 
         // HP input change
@@ -235,6 +242,12 @@ class NPCPanel {
                         <p>${this.escapeHtml(npc.notes)}</p>
                     </div>
                 ` : ''}
+                
+                <div class="npc-combat-actions">
+                    <button class="btn btn-primary add-to-combat-btn" data-npc-id="${npc.id}">
+                        Add to Combat
+                    </button>
+                </div>
             </div>
         `;
     }
@@ -431,7 +444,7 @@ class NPCPanel {
             } else {
                 npc = await api.createNPC(npcData);
                 state.addNPC(npc);
-                state.addCombatant(npc);
+                // Don't automatically add to combat - let user add manually via initiative tracker
             }
             
             this.selectedNPCId = npc.id;
@@ -462,6 +475,47 @@ class NPCPanel {
         } catch (error) {
             console.error('Failed to delete NPC:', error);
             this.showError('Failed to delete NPC');
+        }
+    }
+
+    async addToCombat(npcId) {
+        try {
+            const npc = this.getNPCById(npcId);
+            if (!npc) {
+                this.showError('NPC not found');
+                return;
+            }
+            
+            // Check if already in combat
+            const combatants = state.get('combatants') || [];
+            const alreadyInCombat = combatants.some(c => c.id === npcId);
+            
+            if (alreadyInCombat) {
+                this.showError('NPC is already in combat');
+                return;
+            }
+            
+            // Prompt for initiative
+            const initiative = prompt(`Enter initiative for ${npc.name}:`, '10');
+            if (initiative === null) return; // User cancelled
+            
+            const initiativeValue = parseInt(initiative) || 0;
+            
+            // Update the NPC's initiative (NPCs exist in combatants table with type='NPC')
+            const response = await api.updateNPC(npcId, {
+                initiative: initiativeValue
+            });
+            
+            if (response) {
+                // Update state - add to initiative tracker
+                const updatedNPC = { ...npc, initiative: initiativeValue };
+                state.addCombatant(updatedNPC);
+                state.updateNPC(npcId, { initiative: initiativeValue });
+                this.showSuccess(`${npc.name} added to combat!`);
+            }
+        } catch (error) {
+            console.error('Failed to add to combat:', error);
+            this.showError(`Failed to add NPC to combat: ${error.message}`);
         }
     }
 
@@ -532,6 +586,15 @@ class NPCPanel {
         this.container.insertBefore(errorDiv, this.container.firstChild);
         
         setTimeout(() => errorDiv.remove(), 3000);
+    }
+
+    showSuccess(message) {
+        const successDiv = document.createElement('div');
+        successDiv.className = 'success-message';
+        successDiv.textContent = message;
+        this.container.insertBefore(successDiv, this.container.firstChild);
+        
+        setTimeout(() => successDiv.remove(), 3000);
     }
 }
 
