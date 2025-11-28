@@ -305,20 +305,34 @@ class InitiativeTracker {
      * Show form to add a new combatant
      */
     showAddCombatantForm() {
-        // Simple prompt-based form for now
-        // In a full implementation, this would be a modal dialog
-        const name = prompt('Combatant name:');
-        if (!name) return;
+        const message = `Add combatants from the Character or Monster panels.
 
-        const type = prompt('Type (PC/NPC/Monster):', 'Monster');
-        if (!type || !['PC', 'NPC', 'Monster'].includes(type)) {
+For quick NPC/enemy addition:
+- Name: Enter combatant name
+- Type: PC, NPC, or Monster
+- Initiative: Roll or enter value
+- AC: Armor Class
+- HP: Hit Points`;
+
+        const name = prompt(message + '\n\nCombatant name:');
+        if (name === null || !name.trim()) return;
+
+        const type = prompt('Type (PC/NPC/Monster):', 'NPC');
+        if (type === null) return;
+        
+        if (!['PC', 'NPC', 'Monster'].includes(type)) {
             alert('Invalid type. Must be PC, NPC, or Monster');
             return;
         }
 
         const initiative = prompt('Initiative:', '10');
+        if (initiative === null) return;
+        
         const ac = prompt('AC:', '15');
+        if (ac === null) return;
+        
         const maxHp = prompt('Max HP:', '50');
+        if (maxHp === null) return;
 
         const combatantData = {
             name: name.trim(),
@@ -335,7 +349,14 @@ class InitiativeTracker {
             save_charisma: 0
         };
 
-        this.addCombatant(combatantData);
+        this.addCombatant(combatantData)
+            .then(() => {
+                console.log('Combatant added successfully');
+            })
+            .catch(error => {
+                console.error('Failed to add combatant:', error);
+                alert('Failed to add combatant. Please try again.');
+            });
     }
 
     /**
