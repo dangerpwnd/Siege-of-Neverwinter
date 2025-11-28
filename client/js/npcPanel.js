@@ -30,9 +30,10 @@ class NPCPanel {
         // Event delegation for dynamic content
         this.container.addEventListener('click', (e) => {
             // NPC selection
-            if (e.target.closest('.npc-list-item')) {
-                const item = e.target.closest('.npc-list-item');
+            if (e.target.closest('.character-list-item')) {
+                const item = e.target.closest('.character-list-item');
                 const npcId = parseInt(item.dataset.npcId);
+                console.log('NPC list item clicked, ID:', npcId);
                 this.selectNPC(npcId);
             }
             
@@ -66,7 +67,9 @@ class NPCPanel {
             
             // Delete NPC button
             if (e.target.closest('#delete-npc-btn')) {
-                this.deleteNPC();
+                const btn = e.target.closest('#delete-npc-btn');
+                const npcId = parseInt(btn.dataset.npcId);
+                this.deleteNPC(npcId);
             }
             
             // Add to combat button
@@ -90,8 +93,11 @@ class NPCPanel {
     async loadNPCs() {
         try {
             const campaignId = state.get('currentCampaignId');
+            console.log('Loading NPCs for campaign:', campaignId);
             const npcs = await api.getNPCs(campaignId);
+            console.log('Loaded NPCs:', npcs);
             state.setState({ npcs });
+            console.log('NPCs set in state, count:', npcs.length);
         } catch (error) {
             console.error('Failed to load NPCs:', error);
             this.showError('Failed to load NPCs');
@@ -99,8 +105,10 @@ class NPCPanel {
     }
 
     selectNPC(npcId) {
+        console.log('Selecting NPC:', npcId);
         this.selectedNPCId = npcId;
         state.selectCombatant(npcId);
+        console.log('Selected NPC ID set to:', this.selectedNPCId);
         this.render();
     }
 
@@ -407,6 +415,7 @@ class NPCPanel {
                     <div class="form-actions">
                         <button type="button" id="save-npc-btn" class="btn btn-primary">Save Changes</button>
                         <button type="button" id="cancel-npc-btn" class="btn btn-secondary">Cancel</button>
+                        <button type="button" id="delete-npc-btn" class="btn btn-danger" data-npc-id="${npc.id}">Delete NPC</button>
                     </div>
                 </form>
             </div>
@@ -455,26 +464,41 @@ class NPCPanel {
         }
     }
 
-    async deleteNPC() {
-        const npc = this.getSelectedNPC();
-        if (!npc) return;
+    async deleteNPC(npcId = null) {
+        const id = npcId || this.selectedNPCId;
+        const npc = this.getNPCById(id);
         
-        if (!confirm(`Are you sure you want to delete ${npc.name}?`)) {
+        if (!npc) {
+            this.showError('NPC not found');
+            return;
+        }
+        
+        if (!confirm(`Are you sure you want to delete ${npc.name}? This cannot be undone.`)) {
             return;
         }
         
         try {
-            await api.deleteNPC(npc.id);
+            console.log('Deleting NPC:', npc.name, 'ID:', id);
             
-            // Remove from state - both npcs and combatants
-            state.removeNPC(npc.id);
-            state.removeCombatant(npc.id);
+            await api.deleteNPC(id);
             
+            // Remove from state
+            const npcs = state.get('npcs').filter(n => n.id !== id);
+            state.setState({ npcs });
+            
+            // Also remove from combatants if present
+            const combatants = state.get('combatants').filter(c => c.id !== id);
+            state.setState({ combatants });
+            
+            // Clear selection
             this.selectedNPCId = null;
+            state.clearSelection();
+            
+            this.showSuccess(`${npc.name} deleted successfully`);
             this.render();
         } catch (error) {
             console.error('Failed to delete NPC:', error);
-            this.showError('Failed to delete NPC');
+            this.showError(`Failed to delete NPC: ${error.message}`);
         }
     }
 
@@ -525,22 +549,37 @@ class NPCPanel {
 
     getNPCById(id) {
         // Check both npcs array and combatants array
-        const npcs = state.get('npcs');
+        const npcs = state.get('npcs') || [];
+        console.log('getNPCById - Looking for ID:', id, 'in', npcs.length, 'NPCs');
         const npc = npcs.find(n => n.id === id);
-        if (npc) return npc;
+        if (npc) {
+            console.log('Found NPC:', npc.name);
+            return npc;
+        }
         
-        const combatants = state.get('combatants');
-        return combatants.find(c => c.id === id && c.type === 'NPC');
+        const combatants = state.get('combatants') || [];
+        const combatantNPC = combatants.find(c => c.id === id && c.type === 'NPC');
+        if (combatantNPC) {
+            console.log('Found NPC in combatants:', combatantNPC.name);
+        } else {
+            console.log('NPC not found anywhere');
+        }
+        return combatantNPC;
     }
 
     getSelectedNPC() {
         const selectedId = state.get('selectedCombatantId') || this.selectedNPCId;
-        return this.getNPCById(selectedId);
+        console.log('getSelectedNPC - selectedId:', selectedId, 'this.selectedNPCId:', this.selectedNPCId);
+        const npc = this.getNPCById(selectedId);
+        console.log('getSelectedNPC - result:', npc ? npc.name : 'null');
+        return npc;
     }
 
     render() {
-        const npcs = state.get('npcs');
+        const npcs = state.get('npcs') || [];
+        console.log('Rendering NPC panel with', npcs.length, 'NPCs');
         const selectedNPC = this.getSelectedNPC();
+        console.log('Selected NPC for render:', selectedNPC ? selectedNPC.name : 'none');
         
         this.container.innerHTML = `
             <div class="character-panel">
@@ -565,21 +604,6 @@ class NPCPanel {
                 </div>
             </div>
         `;
-    }
-
-    getNPCById(id) {
-        // Check both npcs array and combatants array
-        const npcs = state.get('npcs');
-        const npc = npcs.find(n => n.id === id);
-        if (npc) return npc;
-        
-        const combatants = state.get('combatants');
-        return combatants.find(c => c.id === id && c.type === 'NPC');
-    }
-
-    getSelectedNPC() {
-        const selectedId = state.get('selectedCombatantId') || this.selectedNPCId;
-        return this.getNPCById(selectedId);
     }
 
     formatModifier(value) {
