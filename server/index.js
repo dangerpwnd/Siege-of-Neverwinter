@@ -26,6 +26,7 @@ app.use('/api/locations', require('./routes/locations'));
 app.use('/api/plotpoints', require('./routes/plotpoints'));
 app.use('/api/preferences', require('./routes/preferences'));
 app.use('/api/layout', require('./routes/layout'));
+app.use('/api/reference', require('./routes/reference'));
 
 // Health check endpoint
 app.get('/api/health', (req, res) => {
