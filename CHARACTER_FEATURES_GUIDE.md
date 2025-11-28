@@ -3,6 +3,7 @@
 ## Overview
 
 The character panel now includes enhanced character information:
+- **Race**: Character race and subrace from D&D 5e (organized by race family)
 - **Class**: Character class from D&D 5e (Barbarian, Wizard, etc.)
 - **Subclass**: Character subclass/archetype (dynamically populated based on class)
 - **Background**: Character background (Entertainer, Acolyte, etc.)
@@ -13,6 +14,7 @@ The character panel now includes enhanced character information:
 ## Database Changes
 
 Added new columns to the `combatants` table:
+- `race`: VARCHAR(100) - Character race/subrace
 - `character_class`: VARCHAR(100) - Character class (now uses dropdown)
 - `subclass`: VARCHAR(100) - Character subclass/archetype
 - `background`: VARCHAR(100) - Character background
@@ -24,12 +26,33 @@ Migration files:
 - `database/add-features-items.sql`
 - `database/add-background-alignment.sql`
 - `database/add-subclass.sql`
+- `database/add-race.sql`
 
 ## Usage
 
 ### Creating/Editing Characters
 
 When creating or editing a character, you can now specify:
+
+**Race:**
+Dropdown selection organized by race families with subraces:
+- **Dragonborn**: Dragonborn
+- **Dwarf**: Hill Dwarf, Mountain Dwarf, Duergar
+- **Elf**: High Elf, Wood Elf, Dark Elf (Drow), Eladrin, Sea Elf, Shadar-kai
+- **Gnome**: Forest Gnome, Rock Gnome, Deep Gnome
+- **Half-Elf**: Half-Elf
+- **Half-Orc**: Half-Orc
+- **Halfling**: Lightfoot Halfling, Stout Halfling, Ghostwise Halfling
+- **Human**: Human, Variant Human
+- **Tiefling**: Tiefling
+- **Aasimar**: Protector Aasimar, Scourge Aasimar, Fallen Aasimar
+- **Firbolg**: Firbolg
+- **Genasi**: Air Genasi, Earth Genasi, Fire Genasi, Water Genasi
+- **Goliath**: Goliath
+- **Kenku**: Kenku
+- **Lizardfolk**: Lizardfolk
+- **Tabaxi**: Tabaxi
+- **Triton**: Triton
 
 **Class:**
 Dropdown selection with all 13 D&D 5e classes:
@@ -87,8 +110,12 @@ Cloak of Elvenkind | Advantage on Stealth checks | yes
 ### Display
 
 Character information is displayed in the character detail view:
-- **Header**: Shows character name with class/level (subclass), background, and alignment as badges
-  - Example: "Fighter 5 (Battle Master)"
+- **Header**: Shows character name with race, class/level (subclass), background, and alignment as badges
+  - Example: "High Elf Fighter 5 (Battle Master)"
+  - Race badge: Purple
+  - Class badge: Blue
+  - Background badge: Gray with border
+  - Alignment badge: Light gray, italic
 - **Features**: Show the name in bold with the description below
 - **Items**: Show the name in bold with an "ATTUNEMENT" badge if required
 - Empty sections show a placeholder message
@@ -97,6 +124,7 @@ Character information is displayed in the character detail view:
 
 ### POST /api/characters
 Added optional fields:
+- `race`: String - Character race/subrace
 - `character_class`: String - Character class
 - `subclass`: String - Character subclass
 - `background`: String - Character background
@@ -106,6 +134,7 @@ Added optional fields:
 
 ### PUT /api/characters/:id
 Added optional fields:
+- `race`: String - Character race/subrace
 - `character_class`: String - Character class
 - `subclass`: String - Character subclass
 - `background`: String - Character background
@@ -117,10 +146,11 @@ Added optional fields:
 
 New CSS classes added to `client/styles/main.css`:
 - `.character-info`: Container for character badges
+- `.character-race`: Race badge styling (purple background)
 - `.character-class`, `.character-background`, `.character-alignment`: Badge styling
 - `.features-display`, `.items-display`: Container styling
 - `.feature-list`, `.item-list`: List styling
 - `.feature-item`, `.item-entry`: Individual item styling
 - `.attunement-badge`: Badge for items requiring attunement
 - `.no-features`, `.no-items`: Empty state styling
-- `.form-group select`: Dropdown styling for alignment selection
+- `.form-group select`: Dropdown styling for race, class, background, and alignment selection
