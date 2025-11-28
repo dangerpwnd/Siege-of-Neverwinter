@@ -144,9 +144,17 @@ class CharacterPanel {
             <div class="character-detail ${isDown ? 'character-down' : ''}">
                 <div class="character-header">
                     <h3>${this.escapeHtml(character.name)}</h3>
-                    ${character.character_class && character.level ? 
-                        `<span class="character-class">${this.escapeHtml(character.character_class)} ${character.level}</span>` 
-                        : ''}
+                    <div class="character-info">
+                        ${character.character_class && character.level ? 
+                            `<span class="character-class">${this.escapeHtml(character.character_class)} ${character.level}</span>` 
+                            : ''}
+                        ${character.background ? 
+                            `<span class="character-background">${this.escapeHtml(character.background)}</span>` 
+                            : ''}
+                        ${character.alignment ? 
+                            `<span class="character-alignment">${this.escapeHtml(character.alignment)}</span>` 
+                            : ''}
+                    </div>
                     <button id="edit-character-btn" class="btn btn-small">Edit</button>
                 </div>
                 
@@ -222,6 +230,16 @@ class CharacterPanel {
                     ` : '<p class="no-conditions">No active conditions</p>'}
                 </div>
                 
+                <div class="features-display">
+                    <h4>Class & Racial Features</h4>
+                    ${this.displayFeatures(character.features)}
+                </div>
+                
+                <div class="items-display">
+                    <h4>Magical Items</h4>
+                    ${this.displayMagicalItems(character.magical_items)}
+                </div>
+                
                 ${character.notes ? `
                     <div class="character-notes">
                         <h4>Notes</h4>
@@ -250,6 +268,28 @@ class CharacterPanel {
                         <div class="form-group">
                             <label for="char-level">Level</label>
                             <input type="number" id="char-level" min="1" max="20" value="1" />
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="char-background">Background</label>
+                            <input type="text" id="char-background" placeholder="Entertainer, Acolyte, etc." />
+                        </div>
+                        <div class="form-group">
+                            <label for="char-alignment">Alignment</label>
+                            <select id="char-alignment">
+                                <option value="">Select alignment</option>
+                                <option value="Lawful Good">Lawful Good</option>
+                                <option value="Neutral Good">Neutral Good</option>
+                                <option value="Chaotic Good">Chaotic Good</option>
+                                <option value="Lawful Neutral">Lawful Neutral</option>
+                                <option value="True Neutral">True Neutral</option>
+                                <option value="Chaotic Neutral">Chaotic Neutral</option>
+                                <option value="Lawful Evil">Lawful Evil</option>
+                                <option value="Neutral Evil">Neutral Evil</option>
+                                <option value="Chaotic Evil">Chaotic Evil</option>
+                            </select>
                         </div>
                     </div>
                     
@@ -301,6 +341,20 @@ class CharacterPanel {
                         <textarea id="char-notes" rows="3"></textarea>
                     </div>
                     
+                    <h4>Class & Racial Features</h4>
+                    <div class="form-group">
+                        <label for="char-features">Features (one per line: Name | Description)</label>
+                        <textarea id="char-features" rows="4" placeholder="Rage | Enter a rage as a bonus action&#10;Darkvision | See in dim light within 60 feet"></textarea>
+                        <small>Format: Feature Name | Description (optional)</small>
+                    </div>
+                    
+                    <h4>Magical Items</h4>
+                    <div class="form-group">
+                        <label for="char-items">Magical Items (one per line: Name | Description | Attunement)</label>
+                        <textarea id="char-items" rows="4" placeholder="Flame Tongue | +2d6 fire damage | yes&#10;Ring of Protection | +1 AC and saves"></textarea>
+                        <small>Format: Item Name | Description (optional) | Attunement (yes/no, optional)</small>
+                    </div>
+                    
                     <div class="form-actions">
                         <button type="button" id="save-character-btn" class="btn btn-primary">Create Character</button>
                         <button type="button" id="cancel-character-btn" class="btn btn-secondary">Cancel</button>
@@ -333,6 +387,28 @@ class CharacterPanel {
                         <div class="form-group">
                             <label for="char-level">Level</label>
                             <input type="number" id="char-level" min="1" max="20" value="${character.level || 1}" />
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="char-background">Background</label>
+                            <input type="text" id="char-background" value="${this.escapeHtml(character.background || '')}" placeholder="Entertainer, Acolyte, etc." />
+                        </div>
+                        <div class="form-group">
+                            <label for="char-alignment">Alignment</label>
+                            <select id="char-alignment">
+                                <option value="">Select alignment</option>
+                                <option value="Lawful Good" ${character.alignment === 'Lawful Good' ? 'selected' : ''}>Lawful Good</option>
+                                <option value="Neutral Good" ${character.alignment === 'Neutral Good' ? 'selected' : ''}>Neutral Good</option>
+                                <option value="Chaotic Good" ${character.alignment === 'Chaotic Good' ? 'selected' : ''}>Chaotic Good</option>
+                                <option value="Lawful Neutral" ${character.alignment === 'Lawful Neutral' ? 'selected' : ''}>Lawful Neutral</option>
+                                <option value="True Neutral" ${character.alignment === 'True Neutral' ? 'selected' : ''}>True Neutral</option>
+                                <option value="Chaotic Neutral" ${character.alignment === 'Chaotic Neutral' ? 'selected' : ''}>Chaotic Neutral</option>
+                                <option value="Lawful Evil" ${character.alignment === 'Lawful Evil' ? 'selected' : ''}>Lawful Evil</option>
+                                <option value="Neutral Evil" ${character.alignment === 'Neutral Evil' ? 'selected' : ''}>Neutral Evil</option>
+                                <option value="Chaotic Evil" ${character.alignment === 'Chaotic Evil' ? 'selected' : ''}>Chaotic Evil</option>
+                            </select>
                         </div>
                     </div>
                     
@@ -384,6 +460,20 @@ class CharacterPanel {
                         <textarea id="char-notes" rows="3">${this.escapeHtml(character.notes || '')}</textarea>
                     </div>
                     
+                    <h4>Class & Racial Features</h4>
+                    <div class="form-group">
+                        <label for="char-features">Features (one per line: Name | Description)</label>
+                        <textarea id="char-features" rows="4" placeholder="Rage | Enter a rage as a bonus action&#10;Darkvision | See in dim light within 60 feet">${this.formatFeaturesForEdit(character.features)}</textarea>
+                        <small>Format: Feature Name | Description (optional)</small>
+                    </div>
+                    
+                    <h4>Magical Items</h4>
+                    <div class="form-group">
+                        <label for="char-items">Magical Items (one per line: Name | Description | Attunement)</label>
+                        <textarea id="char-items" rows="4" placeholder="Flame Tongue | +2d6 fire damage | yes&#10;Ring of Protection | +1 AC and saves">${this.formatItemsForEdit(character.magical_items)}</textarea>
+                        <small>Format: Item Name | Description (optional) | Attunement (yes/no, optional)</small>
+                    </div>
+                    
                     <div class="form-actions">
                         <button type="button" id="save-character-btn" class="btn btn-primary">Save Changes</button>
                         <button type="button" id="cancel-character-btn" class="btn btn-secondary">Cancel</button>
@@ -398,11 +488,16 @@ class CharacterPanel {
             const characterId = document.getElementById('char-id')?.value;
             const isEdit = !!characterId;
             
+            const featuresText = document.getElementById('char-features').value;
+            const itemsText = document.getElementById('char-items').value;
+            
             const characterData = {
                 campaign_id: state.get('currentCampaignId'),
                 name: document.getElementById('char-name').value,
                 character_class: document.getElementById('char-class').value,
                 level: parseInt(document.getElementById('char-level').value) || 1,
+                background: document.getElementById('char-background').value,
+                alignment: document.getElementById('char-alignment').value,
                 ac: parseInt(document.getElementById('char-ac').value),
                 max_hp: parseInt(document.getElementById('char-max-hp').value),
                 current_hp: isEdit ? undefined : parseInt(document.getElementById('char-max-hp').value),
@@ -413,7 +508,9 @@ class CharacterPanel {
                 save_intelligence: parseInt(document.getElementById('char-save-int').value) || 0,
                 save_wisdom: parseInt(document.getElementById('char-save-wis').value) || 0,
                 save_charisma: parseInt(document.getElementById('char-save-cha').value) || 0,
-                notes: document.getElementById('char-notes').value
+                notes: document.getElementById('char-notes').value,
+                features: this.parseFeaturesFromForm(featuresText),
+                magical_items: this.parseItemsFromForm(itemsText)
             };
             
             let character;
@@ -471,6 +568,93 @@ class CharacterPanel {
                 </div>
             </div>
         `;
+    }
+
+    displayFeatures(features) {
+        const featureList = Array.isArray(features) ? features : [];
+        
+        if (featureList.length === 0) {
+            return '<p class="no-features">No features listed</p>';
+        }
+        
+        return `
+            <ul class="feature-list">
+                ${featureList.map(feature => `
+                    <li class="feature-item">
+                        <strong>${this.escapeHtml(feature.name)}</strong>
+                        ${feature.description ? `<p>${this.escapeHtml(feature.description)}</p>` : ''}
+                    </li>
+                `).join('')}
+            </ul>
+        `;
+    }
+
+    formatFeaturesForEdit(features) {
+        const featureList = Array.isArray(features) ? features : [];
+        return featureList.map(f => {
+            return f.description ? `${f.name} | ${f.description}` : f.name;
+        }).join('\n');
+    }
+
+    parseFeaturesFromForm(text) {
+        if (!text || !text.trim()) return [];
+        
+        return text.split('\n')
+            .map(line => line.trim())
+            .filter(line => line.length > 0)
+            .map(line => {
+                const parts = line.split('|').map(p => p.trim());
+                return {
+                    name: parts[0],
+                    description: parts[1] || ''
+                };
+            });
+    }
+
+    displayMagicalItems(items) {
+        const itemList = Array.isArray(items) ? items : [];
+        
+        if (itemList.length === 0) {
+            return '<p class="no-items">No magical items</p>';
+        }
+        
+        return `
+            <ul class="item-list">
+                ${itemList.map(item => `
+                    <li class="item-entry">
+                        <strong>${this.escapeHtml(item.name)}</strong>
+                        ${item.attunement ? '<span class="attunement-badge">Attunement</span>' : ''}
+                        ${item.description ? `<p>${this.escapeHtml(item.description)}</p>` : ''}
+                    </li>
+                `).join('')}
+            </ul>
+        `;
+    }
+
+    formatItemsForEdit(items) {
+        const itemList = Array.isArray(items) ? items : [];
+        return itemList.map(item => {
+            let line = item.name;
+            if (item.description) line += ` | ${item.description}`;
+            if (item.attunement) line += ' | yes';
+            return line;
+        }).join('\n');
+    }
+
+    parseItemsFromForm(text) {
+        if (!text || !text.trim()) return [];
+        
+        return text.split('\n')
+            .map(line => line.trim())
+            .filter(line => line.length > 0)
+            .map(line => {
+                const parts = line.split('|').map(p => p.trim());
+                return {
+                    name: parts[0],
+                    description: parts[1] || '',
+                    attunement: parts[2] && parts[2].toLowerCase() === 'yes'
+                };
+            });
     }
 
     formatModifier(value) {
