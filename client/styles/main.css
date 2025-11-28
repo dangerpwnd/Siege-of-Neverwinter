@@ -2990,6 +2990,7 @@ a {
     margin-bottom: 0.5rem;
 }
 
+.character-race,
 .character-class,
 .character-background,
 .character-alignment {
@@ -2998,6 +2999,11 @@ a {
     border-radius: 4px;
     font-size: 0.875rem;
     font-weight: 500;
+}
+
+.character-race {
+    background: #8b5cf6;
+    color: white;
 }
 
 .character-class {
