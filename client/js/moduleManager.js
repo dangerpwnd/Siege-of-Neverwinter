@@ -6,8 +6,6 @@ import state from './state.js';
 class ModuleManager {
     constructor() {
         this.modules = new Map();
-        this.draggedModule = null;
-        this.dragOverColumn = null;
         this.saveTimeout = null;
         this.hiddenModules = new Set();
     }
@@ -121,9 +119,6 @@ class ModuleManager {
             
             // Add module control buttons (expand/shrink, close)
             this.addModuleControls(moduleEl, moduleId);
-            
-            // Set up HTML5 drag and drop
-            this.setupDragAndDrop(moduleEl, moduleId);
         });
         
         // Create module picker for adding hidden modules back
@@ -172,112 +167,7 @@ class ModuleManager {
         }
     }
     
-    // Setup HTML5 drag and drop for a module
-    setupDragAndDrop(moduleEl, moduleId) {
-        const header = moduleEl.querySelector('.module-header');
-        if (!header) return;
-        
-        // Make module draggable
-        moduleEl.setAttribute('draggable', 'true');
-        
-        // Drag start
-        moduleEl.addEventListener('dragstart', (e) => {
-            // Don't drag if clicking on buttons
-            if (e.target.closest('.module-control-btn') || e.target.closest('.module-toggle')) {
-                e.preventDefault();
-                return;
-            }
-            
-            this.draggedModule = this.modules.get(moduleId);
-            moduleEl.classList.add('dragging');
-            e.dataTransfer.effectAllowed = 'move';
-            e.dataTransfer.setData('text/plain', moduleId);
-            
-            // Create drop zones
-            this.createDropZones();
-        });
-        
-        // Drag end
-        moduleEl.addEventListener('dragend', (e) => {
-            moduleEl.classList.remove('dragging');
-            this.removeDropZones();
-            this.draggedModule = null;
-            this.dragOverColumn = null;
-        });
-    }
-    
-    // Create drop zones for each column position
-    createDropZones() {
-        const moduleGrid = document.querySelector('.module-grid');
-        if (!moduleGrid) return;
-        
-        const columnCount = window.siegeLayoutManager?.getColumnCount() || 3;
-        const gridRect = moduleGrid.getBoundingClientRect();
-        const columnWidth = gridRect.width / columnCount;
-        
-        // Create drop zone for each column
-        for (let i = 0; i < columnCount; i++) {
-            const dropZone = document.createElement('div');
-            dropZone.className = 'module-drop-zone';
-            dropZone.dataset.column = i;
-            dropZone.style.left = `${i * columnWidth}px`;
-            dropZone.style.width = `${columnWidth}px`;
-            
-            // Drop zone events
-            dropZone.addEventListener('dragover', (e) => {
-                e.preventDefault();
-                e.dataTransfer.dropEffect = 'move';
-                dropZone.classList.add('drag-over');
-                this.dragOverColumn = i;
-            });
-            
-            dropZone.addEventListener('dragleave', (e) => {
-                dropZone.classList.remove('drag-over');
-            });
-            
-            dropZone.addEventListener('drop', (e) => {
-                e.preventDefault();
-                dropZone.classList.remove('drag-over');
-                
-                if (this.draggedModule) {
-                    this.moveModuleToColumn(this.draggedModule.id, i);
-                }
-            });
-            
-            moduleGrid.appendChild(dropZone);
-        }
-    }
-    
-    // Remove all drop zones
-    removeDropZones() {
-        const dropZones = document.querySelectorAll('.module-drop-zone');
-        dropZones.forEach(zone => zone.remove());
-    }
-    
-    // Move module to a specific column
-    moveModuleToColumn(moduleId, columnIndex) {
-        const module = this.modules.get(moduleId);
-        if (!module) return;
-        
-        // Set grid column
-        module.element.style.gridColumn = `${columnIndex + 1}`;
-        
-        // Save position
-        const modulePositions = state.get('modulePositions') || {};
-        modulePositions[moduleId] = {
-            column: columnIndex,
-            isExpanded: module.isExpanded
-        };
-        state.setState({ modulePositions });
-        
-        // Announce to screen readers
-        if (window.siegeAccessibility) {
-            window.siegeAccessibility.announceStatus(`${moduleId} module moved to column ${columnIndex + 1}`);
-        }
-        
-        console.log(`Module ${moduleId} moved to column ${columnIndex + 1}`);
-    }
-    
+
     // Toggle module expansion
     toggleExpand(moduleId) {
         const module = this.modules.get(moduleId);
