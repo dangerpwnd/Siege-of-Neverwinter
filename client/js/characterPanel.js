@@ -893,6 +893,7 @@ class CharacterPanel {
         try {
             const character = state.getCharacterById(characterId);
             if (!character) {
+                console.error('Character not found in state:', characterId);
                 this.showError('Character not found');
                 return;
             }
@@ -912,10 +913,14 @@ class CharacterPanel {
             
             const initiativeValue = parseInt(initiative) || 0;
             
+            console.log('Adding character to combat:', character.name, 'initiative:', initiativeValue);
+            
             // Update the character's initiative (characters already exist in combatants table)
             const response = await api.put(`/characters/${characterId}`, {
                 initiative: initiativeValue
             });
+            
+            console.log('API response:', response);
             
             if (response) {
                 // Update state - add to initiative tracker
@@ -923,10 +928,15 @@ class CharacterPanel {
                 state.addCombatant(updatedCharacter);
                 state.updateCharacter(characterId, { initiative: initiativeValue });
                 this.showSuccess(`${character.name} added to combat!`);
+            } else {
+                console.error('No response from API');
+                this.showError('Failed to add character - no response from server');
             }
         } catch (error) {
             console.error('Failed to add to combat:', error);
-            this.showError('Failed to add character to combat');
+            console.error('Error details:', error.message, error.stack);
+            console.error('Current characters in state:', state.get('characters'));
+            this.showError(`Failed to add character to combat: ${error.message}`);
             // Don't modify state on error - existing data remains intact
         }
     }
