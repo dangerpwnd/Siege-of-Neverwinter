@@ -10,7 +10,8 @@ class NPCPanel {
         this.init();
     }
 
-    init() {
+    async init() {
+        await this.loadNPCs();
         this.render();
         this.setupEventListeners();
         
@@ -564,6 +565,21 @@ class NPCPanel {
                 </div>
             </div>
         `;
+    }
+
+    getNPCById(id) {
+        // Check both npcs array and combatants array
+        const npcs = state.get('npcs');
+        const npc = npcs.find(n => n.id === id);
+        if (npc) return npc;
+        
+        const combatants = state.get('combatants');
+        return combatants.find(c => c.id === id && c.type === 'NPC');
+    }
+
+    getSelectedNPC() {
+        const selectedId = state.get('selectedCombatantId') || this.selectedNPCId;
+        return this.getNPCById(selectedId);
     }
 
     formatModifier(value) {
