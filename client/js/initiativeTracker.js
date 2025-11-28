@@ -189,7 +189,7 @@ class InitiativeTracker {
 
     /**
      * Remove a combatant from the initiative tracker
-     * For PCs/NPCs: Just removes from tracker (keeps in database)
+     * For PCs/NPCs: Sets initiative to 0 and removes from tracker
      * For Monsters: Deletes the instance entirely
      */
     async removeCombatant(id) {
@@ -197,17 +197,22 @@ class InitiativeTracker {
             const combatant = state.getCombatantById(id);
             if (!combatant) return;
             
-            // For PCs and NPCs, just remove from initiative tracker (don't delete from DB)
-            // For Monsters, delete the instance
             if (combatant.type === 'Monster') {
+                // Delete monster instance from database
                 const response = await api.delete(`/initiative/${id}`);
                 if (response.success) {
                     state.removeCombatant(id);
                 }
-            } else {
-                // PC or NPC - just remove from initiative tracker state
-                // They remain in the database for re-adding later
+            } else if (combatant.type === 'PC') {
+                // PC - set initiative to 0 to remove from combat
+                await api.put(`/characters/${id}`, { initiative: 0 });
                 state.removeCombatant(id);
+                state.updateCharacter(id, { initiative: 0 });
+            } else if (combatant.type === 'NPC') {
+                // NPC - set initiative to 0 to remove from combat
+                await api.put(`/npcs/${id}`, { initiative: 0 });
+                state.removeCombatant(id);
+                state.updateNPC(id, { initiative: 0 });
             }
         } catch (error) {
             console.error('Failed to remove combatant:', error);
@@ -651,8 +656,7 @@ class InitiativeTracker {
 
     /**
      * Clear all combatants from initiative
-     * Only deletes monster instances from database
-     * PCs and NPCs are just removed from the tracker
+     * Deletes monster instances, sets PC/NPC initiative to 0
      */
     async clearInitiative() {
         if (!confirm('Are you sure you want to clear all combatants from initiative?')) {
@@ -662,11 +666,19 @@ class InitiativeTracker {
         const combatants = state.get('combatants');
         
         try {
-            // Only delete monster instances from database
-            // PCs and NPCs remain in database for re-use
+            // Handle each combatant type appropriately
             for (const combatant of combatants) {
                 if (combatant.type === 'Monster') {
+                    // Delete monster instances from database
                     await api.delete(`/initiative/${combatant.id}`);
+                } else if (combatant.type === 'PC') {
+                    // Set PC initiative to 0
+                    await api.put(`/characters/${combatant.id}`, { initiative: 0 });
+                    state.updateCharacter(combatant.id, { initiative: 0 });
+                } else if (combatant.type === 'NPC') {
+                    // Set NPC initiative to 0
+                    await api.put(`/npcs/${combatant.id}`, { initiative: 0 });
+                    state.updateNPC(combatant.id, { initiative: 0 });
                 }
             }
             
