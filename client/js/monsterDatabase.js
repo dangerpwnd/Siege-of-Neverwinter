@@ -537,26 +537,50 @@ class MonsterDatabase {
     /**
      * Show form to create a monster instance
      */
-    showCreateInstanceForm(monsterId) {
+    async showCreateInstanceForm(monsterId) {
         const monster = this.monsters.find(m => m.id === monsterId);
         if (!monster) return;
 
         const instanceName = prompt(`Instance name:`, monster.name);
-        if (!instanceName) return;
+        if (instanceName === null) return; // User cancelled
 
         const initiative = prompt('Initiative:', '10');
+        if (initiative === null) return; // User cancelled
 
-        this.createInstance(
-            monsterId,
-            instanceName.trim(),
-            parseInt(initiative) || 0
-        );
+        try {
+            await this.createInstance(
+                monsterId,
+                instanceName.trim(),
+                parseInt(initiative) || 0
+            );
 
-        // Show success message
-        alert(`${instanceName} added to combat!`);
+            // Show success message
+            this.showSuccess(`${instanceName} added to combat!`);
+            
+            // Go back to list
+            this.clearSelection();
+        } catch (error) {
+            console.error('Failed to add monster to combat:', error);
+            this.showError('Failed to add monster to combat');
+        }
+    }
+
+    showSuccess(message) {
+        const successDiv = document.createElement('div');
+        successDiv.className = 'success-message';
+        successDiv.textContent = message;
+        this.container.insertBefore(successDiv, this.container.firstChild);
         
-        // Go back to list
-        this.clearSelection();
+        setTimeout(() => successDiv.remove(), 3000);
+    }
+
+    showError(message) {
+        const errorDiv = document.createElement('div');
+        errorDiv.className = 'error-message';
+        errorDiv.textContent = message;
+        this.container.insertBefore(errorDiv, this.container.firstChild);
+        
+        setTimeout(() => errorDiv.remove(), 3000);
     }
 }
 
