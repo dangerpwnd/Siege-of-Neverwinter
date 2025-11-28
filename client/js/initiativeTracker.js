@@ -189,13 +189,24 @@ class InitiativeTracker {
 
     /**
      * Remove a combatant from the initiative tracker
+     * For PCs/NPCs: Just removes from tracker (keeps in database)
+     * For Monsters: Deletes the instance entirely
      */
     async removeCombatant(id) {
         try {
-            const response = await api.delete(`/initiative/${id}`);
+            const combatant = state.getCombatantById(id);
+            if (!combatant) return;
             
-            if (response.success) {
-                // Remove from state
+            // For PCs and NPCs, just remove from initiative tracker (don't delete from DB)
+            // For Monsters, delete the instance
+            if (combatant.type === 'Monster') {
+                const response = await api.delete(`/initiative/${id}`);
+                if (response.success) {
+                    state.removeCombatant(id);
+                }
+            } else {
+                // PC or NPC - just remove from initiative tracker state
+                // They remain in the database for re-adding later
                 state.removeCombatant(id);
             }
         } catch (error) {
@@ -574,10 +585,14 @@ class InitiativeTracker {
                 const initiative = prompt(`Enter initiative for ${character.name}:`, '10');
                 if (initiative === null) return;
                 
+                console.log('Adding character to initiative:', character.name, 'ID:', id, 'initiative:', initiative);
+                
                 // Update the character's initiative (characters already exist in combatants table)
                 const response = await api.put(`/characters/${id}`, {
                     initiative: parseInt(initiative) || 0
                 });
+                
+                console.log('API response:', response);
                 
                 // Add updated character to initiative tracker state
                 if (response) {
@@ -585,6 +600,9 @@ class InitiativeTracker {
                     state.addCombatant(updatedCharacter);
                     // Also update in characters list
                     state.updateCharacter(id, { initiative: parseInt(initiative) || 0 });
+                } else {
+                    console.error('No response from API when adding character');
+                    alert('Failed to add character - no response from server');
                 }
                 
             } else if (type === 'monster') {
@@ -613,7 +631,10 @@ class InitiativeTracker {
             }
         } catch (error) {
             console.error('Failed to add combatant:', error);
-            alert('Failed to add combatant. Please try again.');
+            console.error('Error details:', error.message, error.stack);
+            console.error('Current characters in state:', state.get('characters'));
+            console.error('Current combatants in state:', state.get('combatants'));
+            alert(`Failed to add combatant: ${error.message}`);
             // Don't modify state on error - existing combatants remain
         }
     }
