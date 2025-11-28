@@ -3936,3 +3936,123 @@ a {
 .module-content {
     transition: height 0.3s ease, padding 0.3s ease;
 }
+
+/* High Contrast Module Styling */
+.high-contrast-module {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    background: var(--bg-dark);
+    color: var(--text-light);
+    padding: 1rem;
+}
+
+.high-contrast-module h3,
+.high-contrast-module h4 {
+    color: var(--text-light);
+    border-bottom-color: var(--border-color);
+}
+
+.high-contrast-module label {
+    color: var(--text-light);
+    font-weight: 600;
+}
+
+.high-contrast-module .metric-value {
+    color: var(--text-light);
+    font-weight: 700;
+}
+
+.high-contrast-module .metric-slider {
+    background: var(--bg-medium);
+}
+
+.high-contrast-module .metric-bar {
+    background-color: var(--bg-medium);
+    border: 1px solid var(--border-color);
+}
+
+.high-contrast-module .metric-input,
+.high-contrast-module textarea,
+.high-contrast-module input[type="text"] {
+    background: var(--bg-medium);
+    color: var(--text-light);
+    border: 1px solid var(--border-color);
+}
+
+.high-contrast-module .metric-input:focus,
+.high-contrast-module textarea:focus,
+.high-contrast-module input[type="text"]:focus {
+    outline: 2px solid var(--accent-color);
+    outline-offset: 2px;
+    border-color: var(--accent-color);
+}
+
+.high-contrast-module .custom-metric-item {
+    background-color: var(--bg-medium);
+    border: 1px solid var(--border-color);
+}
+
+.high-contrast-module .custom-metric-item .metric-name {
+    color: var(--text-light);
+}
+
+.high-contrast-module .btn-icon {
+    color: var(--text-medium);
+}
+
+.high-contrast-module .btn-icon:hover {
+    color: var(--accent-hover);
+}
+
+.high-contrast-module .note-item {
+    background: var(--bg-medium);
+    border: 1px solid var(--border-color);
+    color: var(--text-light);
+}
+
+.high-contrast-module .note-content,
+.high-contrast-module .note-text {
+    color: var(--text-light);
+}
+
+.high-contrast-module .note-meta,
+.high-contrast-module .note-timestamp {
+    color: var(--text-dim);
+}
+
+/* Ensure buttons have proper contrast */
+.high-contrast-module .btn {
+    background: var(--primary-color);
+    color: var(--text-light);
+    border: 1px solid var(--primary-hover);
+}
+
+.high-contrast-module .btn:hover {
+    background: var(--primary-hover);
+}
+
+.high-contrast-module .btn-secondary {
+    background: var(--bg-medium);
+    color: var(--text-light);
+    border: 1px solid var(--border-color);
+}
+
+.high-contrast-module .btn-secondary:hover {
+    background: var(--bg-light);
+}
+
+.high-contrast-module .btn-danger {
+    background: var(--danger-color);
+    color: var(--text-light);
+    border: 1px solid var(--danger-hover);
+}
+
+.high-contrast-module .btn-danger:hover {
+    background: var(--danger-hover);
+}
+
+.high-contrast-module .no-notes {
+    color: var(--text-dim);
+    font-style: italic;
+}
