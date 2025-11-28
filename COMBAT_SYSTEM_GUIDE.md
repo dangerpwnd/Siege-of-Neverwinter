@@ -41,21 +41,28 @@ The combat system has been improved to provide an easy, streamlined way to add c
 
 ### Direct Addition (Initiative Tracker)
 
-**For Quick NPCs/Enemies:**
+**Selection Dialog:**
 1. Click "Add Combatant" in the initiative tracker
-2. Follow the prompts:
-   - Name
-   - Type (PC/NPC/Monster)
-   - Initiative
-   - AC
-   - HP
-3. Combatant is added directly
+2. A modal dialog appears showing:
+   - **Characters**: All characters not currently in combat
+   - **Monsters**: All monsters from the database
+3. Click "Add" next to the desired combatant
+4. Enter initiative value when prompted
+5. For monsters, also enter instance name
 
-**Use Cases:**
-- Quick NPCs without full character sheets
-- Temporary enemies
-- Environmental hazards with initiative
-- Summoned creatures
+**Features:**
+- Visual selection instead of text prompts
+- Shows relevant stats (AC, HP, CR)
+- Filters out combatants already in combat
+- Organized by type (Characters/Monsters)
+- Cancel anytime by clicking outside or Cancel button
+
+**Benefits:**
+- No typing errors
+- See all available options at once
+- Quick visual scanning
+- Clear information display
+- Better user experience
 
 ## Initiative Tracker Features
 
