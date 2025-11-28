@@ -3035,3 +3035,88 @@ a {
     border-color: var(--accent-color);
     box-shadow: 0 0 0 2px rgba(var(--accent-color-rgb, 59, 130, 246), 0.1);
 }
+
+/* Monster Form Styling */
+.monster-form {
+    padding: 1.5rem;
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.monster-form h3 {
+    margin-top: 0;
+    margin-bottom: 1.5rem;
+    color: var(--text-primary);
+}
+
+.monster-form h4 {
+    margin-top: 1.5rem;
+    margin-bottom: 1rem;
+    color: var(--text-primary);
+    font-size: 1rem;
+}
+
+.monster-form .ability-row {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 0.75rem;
+}
+
+.monster-form .ability-row .form-group {
+    margin-bottom: 0;
+}
+
+.monster-form .ability-row input {
+    text-align: center;
+}
+
+/* Monster Header Actions */
+.monster-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 2px solid var(--border-color);
+}
+
+.monster-header-actions {
+    display: flex;
+    gap: 0.5rem;
+}
+
+/* Delete Button Styling */
+.btn-danger {
+    background-color: #dc2626;
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.875rem;
+    font-weight: 500;
+    transition: background-color 0.2s;
+}
+
+.btn-danger:hover {
+    background-color: #b91c1c;
+}
+
+.btn-danger:active {
+    background-color: #991b1b;
+}
+
+/* Monster List Item Hover */
+.monster-list-item {
+    cursor: pointer;
+    transition: background-color 0.2s, transform 0.1s;
+}
+
+.monster-list-item:hover {
+    background-color: var(--bg-secondary);
+    transform: translateX(4px);
+}
+
+.monster-list-item:active {
+    transform: translateX(2px);
+}
