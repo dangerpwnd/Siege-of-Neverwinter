@@ -3914,3 +3914,25 @@ a {
 .form-actions .btn-danger {
     margin-left: auto;
 }
+
+/* Module Collapse/Minimize Functionality */
+.module-content.collapsed {
+    display: none;
+    height: 0;
+    overflow: hidden;
+    padding: 0;
+    margin: 0;
+}
+
+.module.collapsed .module-content {
+    display: none;
+    height: 0;
+    overflow: hidden;
+    padding: 0;
+    margin: 0;
+}
+
+/* Smooth transition for collapsing */
+.module-content {
+    transition: height 0.3s ease, padding 0.3s ease;
+}
