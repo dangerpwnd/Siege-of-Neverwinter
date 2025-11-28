@@ -71,6 +71,16 @@ class InitiativeTracker {
                 }
             }
             
+            // Remove condition badge click
+            if (e.target.closest('.condition-badge')) {
+                e.preventDefault();
+                const badge = e.target.closest('.condition-badge');
+                const combatantId = parseInt(badge.dataset.combatantId);
+                const conditionId = badge.dataset.conditionId;
+                const conditionName = badge.dataset.conditionName;
+                this.removeCondition(combatantId, conditionId, conditionName);
+            }
+            
             // Next turn button
             if (e.target.id === 'next-turn-btn') {
                 e.preventDefault();
@@ -275,16 +285,24 @@ class InitiativeTracker {
     /**
      * Get condition indicators HTML
      */
-    getConditionIndicators(conditions) {
+    getConditionIndicators(conditions, combatantId) {
         if (!conditions || conditions.length === 0) {
             return '';
         }
 
         return `
             <div class="condition-indicators">
-                ${conditions.map(condition => {
+                ${conditions.map((condition, index) => {
                     const conditionName = typeof condition === 'string' ? condition : condition.condition;
-                    return `<span class="condition-badge" title="${conditionName}">${this.getConditionAbbr(conditionName)}</span>`;
+                    const conditionId = typeof condition === 'object' && condition.id ? condition.id : index;
+                    return `<button class="condition-badge" 
+                                    data-combatant-id="${combatantId}" 
+                                    data-condition-id="${conditionId}"
+                                    data-condition-name="${this.escapeHtml(conditionName)}"
+                                    title="Click to remove: ${conditionName}">
+                                ${this.getConditionAbbr(conditionName)}
+                                <span class="condition-remove">×</span>
+                            </button>`;
                 }).join('')}
             </div>
         `;
@@ -379,7 +397,7 @@ class InitiativeTracker {
                                     <button class="hp-btn-small heal" data-id="${combatant.id}" data-change="10" title="Heal 10">+10</button>
                                 </div>
                             </div>
-                            ${this.getConditionIndicators(combatant.conditions)}
+                            ${this.getConditionIndicators(combatant.conditions, combatant.id)}
                         </div>
                         <div class="initiative-actions">
                             <button class="action-btn" data-id="${combatant.id}" data-action="add-condition" title="Add Condition">
@@ -730,6 +748,36 @@ class InitiativeTracker {
         } catch (error) {
             console.error('Failed to add condition:', error);
             alert('Failed to add condition');
+        }
+    }
+
+    async removeCondition(combatantId, conditionId, conditionName) {
+        if (!confirm(`Remove condition "${conditionName}"?`)) {
+            return;
+        }
+        
+        try {
+            // If conditionId is numeric, it's a database ID
+            if (!isNaN(conditionId)) {
+                await api.delete(`/combatants/${combatantId}/conditions/${conditionId}`);
+            }
+            
+            // Update state - remove condition from array
+            const combatant = state.getCombatantById(combatantId);
+            if (combatant && combatant.conditions) {
+                const conditions = combatant.conditions.filter((c, index) => {
+                    if (typeof c === 'object' && c.id) {
+                        return c.id != conditionId;
+                    }
+                    return index != conditionId;
+                });
+                state.updateCombatant(combatantId, { conditions });
+            }
+            
+            this.render();
+        } catch (error) {
+            console.error('Failed to remove condition:', error);
+            alert('Failed to remove condition');
         }
     }
 
