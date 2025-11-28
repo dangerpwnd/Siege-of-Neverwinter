@@ -5,6 +5,11 @@
 const { pool } = require('../database/db');
 
 describe('Performance Optimizations', () => {
+    // Clean up database connection after all tests
+    afterAll(async () => {
+        await pool.end();
+    });
+
     describe('Database Connection Pool', () => {
         test('should have connection pool configured', () => {
             expect(pool).toBeDefined();
@@ -50,7 +55,7 @@ describe('Performance Optimizations', () => {
             const result = await pool.query(`
                 SELECT indexname, indexdef
                 FROM pg_indexes 
-                WHERE tablename = 'monsters' AND indexdef LIKE '%GIN%'
+                WHERE tablename = 'monsters' AND LOWER(indexdef) LIKE '%gin%'
             `);
             
             expect(result.rows.length).toBeGreaterThan(0);
