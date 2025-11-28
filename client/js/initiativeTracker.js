@@ -49,6 +49,14 @@ class InitiativeTracker {
                 this.editInitiative(id);
             }
             
+            // HP adjustment buttons
+            if (e.target.classList.contains('hp-btn-small')) {
+                e.preventDefault();
+                const id = parseInt(e.target.dataset.id);
+                const change = parseInt(e.target.dataset.change);
+                this.updateHP(id, change);
+            }
+            
             // Next turn button
             if (e.target.id === 'next-turn-btn') {
                 e.preventDefault();
@@ -67,6 +75,55 @@ class InitiativeTracker {
                 this.clearInitiative();
             }
         });
+        
+        // HP input change
+        this.container.addEventListener('change', (e) => {
+            if (e.target.classList.contains('hp-input-small')) {
+                const id = parseInt(e.target.dataset.id);
+                const newHP = parseInt(e.target.value);
+                this.setHP(id, newHP);
+            }
+        });
+    }
+
+    /**
+     * Update HP by a relative amount
+     */
+    async updateHP(id, change) {
+        try {
+            const combatant = state.getCombatantById(id);
+            if (!combatant) return;
+            
+            const newHP = Math.max(0, Math.min(combatant.current_hp + change, combatant.max_hp));
+            await this.setHP(id, newHP);
+        } catch (error) {
+            console.error('Failed to update HP:', error);
+        }
+    }
+
+    /**
+     * Set HP to a specific value
+     */
+    async setHP(id, newHP) {
+        try {
+            const combatant = state.getCombatantById(id);
+            if (!combatant) return;
+            
+            // Clamp HP between 0 and max
+            const clampedHP = Math.max(0, Math.min(newHP, combatant.max_hp));
+            
+            // Update via API
+            await api.put(`/initiative/${id}`, { 
+                current_hp: clampedHP 
+            });
+            
+            // Update state
+            state.updateCombatant(id, { current_hp: clampedHP });
+            
+            this.render();
+        } catch (error) {
+            console.error('Failed to set HP:', error);
+        }
     }
 
     async loadInitiative() {
@@ -287,9 +344,26 @@ class InitiativeTracker {
                                 <span class="stat-label">AC:</span>
                                 <span class="stat-value">${combatant.ac}</span>
                             </div>
-                            <div class="stat-group">
+                            <div class="stat-group hp-group">
                                 <span class="stat-label">HP:</span>
-                                <span class="stat-value ${combatant.current_hp === 0 ? 'hp-zero' : ''}">${combatant.current_hp}/${combatant.max_hp}</span>
+                                <div class="hp-controls-compact">
+                                    <button class="hp-btn-small" data-id="${combatant.id}" data-change="-10" title="Damage 10">-10</button>
+                                    <button class="hp-btn-small" data-id="${combatant.id}" data-change="-5" title="Damage 5">-5</button>
+                                    <button class="hp-btn-small" data-id="${combatant.id}" data-change="-1" title="Damage 1">-1</button>
+                                    <input 
+                                        type="number" 
+                                        class="hp-input-small" 
+                                        value="${combatant.current_hp}" 
+                                        min="0" 
+                                        max="${combatant.max_hp}"
+                                        data-id="${combatant.id}"
+                                        title="Current HP"
+                                    />
+                                    <span class="hp-max">/${combatant.max_hp}</span>
+                                    <button class="hp-btn-small heal" data-id="${combatant.id}" data-change="1" title="Heal 1">+1</button>
+                                    <button class="hp-btn-small heal" data-id="${combatant.id}" data-change="5" title="Heal 5">+5</button>
+                                    <button class="hp-btn-small heal" data-id="${combatant.id}" data-change="10" title="Heal 10">+10</button>
+                                </div>
                             </div>
                             ${this.getConditionIndicators(combatant.conditions)}
                         </div>
@@ -398,18 +472,11 @@ class InitiativeTracker {
         const modal = document.getElementById('add-combatant-modal');
         if (!modal) return;
         
-        // Close modal
+        // Close modal when clicking overlay
         modal.addEventListener('click', (e) => {
-            if (e.target.dataset.action === 'close-modal' || e.target.id === 'add-combatant-modal') {
-                modal.remove();
-            }
-            
-            // Select combatant
-            if (e.target.dataset.action === 'select-combatant') {
+            if (e.target.id === 'add-combatant-modal') {
                 e.preventDefault();
-                const type = e.target.dataset.type;
-                const id = parseInt(e.target.dataset.id);
-                this.addSelectedCombatant(type, id);
+                e.stopPropagation();
                 modal.remove();
             }
         });
@@ -421,6 +488,29 @@ class InitiativeTracker {
                 e.stopPropagation();
             });
         }
+        
+        // Close button
+        const closeButtons = modal.querySelectorAll('[data-action="close-modal"]');
+        closeButtons.forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                modal.remove();
+            });
+        });
+        
+        // Select combatant buttons
+        const selectButtons = modal.querySelectorAll('[data-action="select-combatant"]');
+        selectButtons.forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                const type = btn.dataset.type;
+                const id = parseInt(btn.dataset.id);
+                this.addSelectedCombatant(type, id);
+                modal.remove();
+            });
+        });
     }
 
     /**
