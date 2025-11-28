@@ -90,13 +90,20 @@ class SiegeMechanics {
      */
     async deleteNote(noteId) {
         try {
+            console.log('Deleting note with ID:', noteId);
             const response = await api.delete(`/siege/notes/${noteId}`);
+            console.log('Delete response:', response);
             
             if (response.success) {
+                console.log('Note deleted successfully, reloading state');
                 await this.loadSiegeState(); // Reload to get updated notes
+            } else {
+                console.error('Delete failed:', response);
+                alert('Failed to delete note');
             }
         } catch (error) {
             console.error('Failed to delete note:', error);
+            alert(`Error deleting note: ${error.message}`);
         }
     }
 
@@ -293,7 +300,7 @@ class SiegeMechanics {
      */
     render() {
         this.container.innerHTML = `
-            <div class="siege-mechanics">
+            <div class="high-contrast-module siege-mechanics">
                 ${this.renderSiegeStatus()}
                 ${this.renderSiegeNotes()}
             </div>
@@ -356,8 +363,12 @@ class SiegeMechanics {
                 }
             } else if (action === 'delete-note') {
                 const noteId = e.target.dataset.id;
+                console.log('Delete note button clicked, ID:', noteId);
                 if (confirm('Delete this note?')) {
+                    console.log('User confirmed deletion');
                     this.deleteNote(noteId);
+                } else {
+                    console.log('User cancelled deletion');
                 }
             } else if (action === 'add-custom-metric') {
                 this.showAddCustomMetricDialog();
