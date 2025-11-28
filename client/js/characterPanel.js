@@ -62,6 +62,13 @@ class CharacterPanel {
             if (e.target.closest('#edit-character-btn')) {
                 this.showEditForm();
             }
+            
+            // Add to combat button
+            if (e.target.closest('.add-to-combat-btn')) {
+                const btn = e.target.closest('.add-to-combat-btn');
+                const characterId = parseInt(btn.dataset.characterId);
+                this.addToCombat(characterId);
+            }
         });
 
         // HP input change and class selection change
@@ -267,6 +274,12 @@ class CharacterPanel {
                         <p>${this.escapeHtml(character.notes)}</p>
                     </div>
                 ` : ''}
+                
+                <div class="character-combat-actions">
+                    <button class="btn btn-primary add-to-combat-btn" data-character-id="${character.id}">
+                        Add to Combat
+                    </button>
+                </div>
             </div>
         `;
     }
@@ -635,6 +648,47 @@ class CharacterPanel {
         this.render();
     }
 
+    async addToCombat(characterId) {
+        try {
+            const character = state.getCharacterById(characterId);
+            if (!character) {
+                this.showError('Character not found');
+                return;
+            }
+            
+            // Check if already in combat
+            const combatants = state.get('combatants') || [];
+            const alreadyInCombat = combatants.some(c => c.id === characterId);
+            
+            if (alreadyInCombat) {
+                this.showError('Character is already in combat');
+                return;
+            }
+            
+            // Prompt for initiative
+            const initiative = prompt(`Enter initiative for ${character.name}:`, '10');
+            if (initiative === null) return; // User cancelled
+            
+            const initiativeValue = parseInt(initiative) || 0;
+            
+            // Add to initiative tracker via API
+            const response = await api.post('/initiative', {
+                campaign_id: state.get('currentCampaignId'),
+                combatant_id: characterId,
+                initiative: initiativeValue
+            });
+            
+            if (response.success) {
+                // Update state
+                state.addCombatant({ ...character, initiative: initiativeValue });
+                this.showSuccess(`${character.name} added to combat!`);
+            }
+        } catch (error) {
+            console.error('Failed to add to combat:', error);
+            this.showError('Failed to add character to combat');
+        }
+    }
+
     getSelectedCharacter() {
         const selectedId = state.get('selectedCombatantId') || this.selectedCharacterId;
         return state.getCharacterById(selectedId) || state.getCombatantById(selectedId);
@@ -795,6 +849,15 @@ class CharacterPanel {
         this.container.insertBefore(errorDiv, this.container.firstChild);
         
         setTimeout(() => errorDiv.remove(), 3000);
+    }
+
+    showSuccess(message) {
+        const successDiv = document.createElement('div');
+        successDiv.className = 'success-message';
+        successDiv.textContent = message;
+        this.container.insertBefore(successDiv, this.container.firstChild);
+        
+        setTimeout(() => successDiv.remove(), 3000);
     }
 }
 
