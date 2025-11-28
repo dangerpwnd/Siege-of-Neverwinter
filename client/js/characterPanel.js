@@ -263,7 +263,22 @@ class CharacterPanel {
                     <div class="form-row">
                         <div class="form-group">
                             <label for="char-class">Class</label>
-                            <input type="text" id="char-class" />
+                            <select id="char-class">
+                                <option value="">Select class</option>
+                                <option value="Artificer">Artificer</option>
+                                <option value="Barbarian">Barbarian</option>
+                                <option value="Bard">Bard</option>
+                                <option value="Cleric">Cleric</option>
+                                <option value="Druid">Druid</option>
+                                <option value="Fighter">Fighter</option>
+                                <option value="Monk">Monk</option>
+                                <option value="Paladin">Paladin</option>
+                                <option value="Ranger">Ranger</option>
+                                <option value="Rogue">Rogue</option>
+                                <option value="Sorcerer">Sorcerer</option>
+                                <option value="Warlock">Warlock</option>
+                                <option value="Wizard">Wizard</option>
+                            </select>
                         </div>
                         <div class="form-group">
                             <label for="char-level">Level</label>
@@ -274,7 +289,22 @@ class CharacterPanel {
                     <div class="form-row">
                         <div class="form-group">
                             <label for="char-background">Background</label>
-                            <input type="text" id="char-background" placeholder="Entertainer, Acolyte, etc." />
+                            <select id="char-background">
+                                <option value="">Select background</option>
+                                <option value="Acolyte">Acolyte</option>
+                                <option value="Charlatan">Charlatan</option>
+                                <option value="Criminal">Criminal</option>
+                                <option value="Entertainer">Entertainer</option>
+                                <option value="Folk Hero">Folk Hero</option>
+                                <option value="Guild Artisan">Guild Artisan</option>
+                                <option value="Hermit">Hermit</option>
+                                <option value="Noble">Noble</option>
+                                <option value="Outlander">Outlander</option>
+                                <option value="Sage">Sage</option>
+                                <option value="Sailor">Sailor</option>
+                                <option value="Soldier">Soldier</option>
+                                <option value="Urchin">Urchin</option>
+                            </select>
                         </div>
                         <div class="form-group">
                             <label for="char-alignment">Alignment</label>
@@ -382,7 +412,22 @@ class CharacterPanel {
                     <div class="form-row">
                         <div class="form-group">
                             <label for="char-class">Class</label>
-                            <input type="text" id="char-class" value="${this.escapeHtml(character.character_class || '')}" />
+                            <select id="char-class">
+                                <option value="">Select class</option>
+                                <option value="Artificer" ${character.character_class === 'Artificer' ? 'selected' : ''}>Artificer</option>
+                                <option value="Barbarian" ${character.character_class === 'Barbarian' ? 'selected' : ''}>Barbarian</option>
+                                <option value="Bard" ${character.character_class === 'Bard' ? 'selected' : ''}>Bard</option>
+                                <option value="Cleric" ${character.character_class === 'Cleric' ? 'selected' : ''}>Cleric</option>
+                                <option value="Druid" ${character.character_class === 'Druid' ? 'selected' : ''}>Druid</option>
+                                <option value="Fighter" ${character.character_class === 'Fighter' ? 'selected' : ''}>Fighter</option>
+                                <option value="Monk" ${character.character_class === 'Monk' ? 'selected' : ''}>Monk</option>
+                                <option value="Paladin" ${character.character_class === 'Paladin' ? 'selected' : ''}>Paladin</option>
+                                <option value="Ranger" ${character.character_class === 'Ranger' ? 'selected' : ''}>Ranger</option>
+                                <option value="Rogue" ${character.character_class === 'Rogue' ? 'selected' : ''}>Rogue</option>
+                                <option value="Sorcerer" ${character.character_class === 'Sorcerer' ? 'selected' : ''}>Sorcerer</option>
+                                <option value="Warlock" ${character.character_class === 'Warlock' ? 'selected' : ''}>Warlock</option>
+                                <option value="Wizard" ${character.character_class === 'Wizard' ? 'selected' : ''}>Wizard</option>
+                            </select>
                         </div>
                         <div class="form-group">
                             <label for="char-level">Level</label>
@@ -393,7 +438,22 @@ class CharacterPanel {
                     <div class="form-row">
                         <div class="form-group">
                             <label for="char-background">Background</label>
-                            <input type="text" id="char-background" value="${this.escapeHtml(character.background || '')}" placeholder="Entertainer, Acolyte, etc." />
+                            <select id="char-background">
+                                <option value="">Select background</option>
+                                <option value="Acolyte" ${character.background === 'Acolyte' ? 'selected' : ''}>Acolyte</option>
+                                <option value="Charlatan" ${character.background === 'Charlatan' ? 'selected' : ''}>Charlatan</option>
+                                <option value="Criminal" ${character.background === 'Criminal' ? 'selected' : ''}>Criminal</option>
+                                <option value="Entertainer" ${character.background === 'Entertainer' ? 'selected' : ''}>Entertainer</option>
+                                <option value="Folk Hero" ${character.background === 'Folk Hero' ? 'selected' : ''}>Folk Hero</option>
+                                <option value="Guild Artisan" ${character.background === 'Guild Artisan' ? 'selected' : ''}>Guild Artisan</option>
+                                <option value="Hermit" ${character.background === 'Hermit' ? 'selected' : ''}>Hermit</option>
+                                <option value="Noble" ${character.background === 'Noble' ? 'selected' : ''}>Noble</option>
+                                <option value="Outlander" ${character.background === 'Outlander' ? 'selected' : ''}>Outlander</option>
+                                <option value="Sage" ${character.background === 'Sage' ? 'selected' : ''}>Sage</option>
+                                <option value="Sailor" ${character.background === 'Sailor' ? 'selected' : ''}>Sailor</option>
+                                <option value="Soldier" ${character.background === 'Soldier' ? 'selected' : ''}>Soldier</option>
+                                <option value="Urchin" ${character.background === 'Urchin' ? 'selected' : ''}>Urchin</option>
+                            </select>
                         </div>
                         <div class="form-group">
                             <label for="char-alignment">Alignment</label>
