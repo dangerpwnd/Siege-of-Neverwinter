@@ -56,7 +56,7 @@ class CharacterPanel {
     async loadCharacters() {
         try {
             const campaignId = state.get('currentCampaignId');
-            const characters = await api.get(`/characters?campaign_id=${campaignId}`);
+            const characters = await api.getCharacters(campaignId);
             
             if (Array.isArray(characters)) {
                 state.setState({ characters });
@@ -67,6 +67,7 @@ class CharacterPanel {
         } catch (error) {
             console.error('Failed to load characters:', error);
             this.showError('Failed to load characters');
+            // Don't clear existing characters on error
         }
     }
 
@@ -145,17 +146,6 @@ class CharacterPanel {
         subclassSelect.disabled = false;
         subclassSelect.innerHTML = '<option value="">Select subclass</option>' + 
             subclasses.map(sub => `<option value="${this.escapeHtml(sub)}">${this.escapeHtml(sub)}</option>`).join('');
-    }
-
-    async loadCharacters() {
-        try {
-            const campaignId = state.get('currentCampaignId');
-            const characters = await api.getCharacters(campaignId);
-            state.setState({ characters });
-        } catch (error) {
-            console.error('Failed to load characters:', error);
-            this.showError('Failed to load characters');
-        }
     }
 
     selectCharacter(characterId) {
@@ -922,21 +912,22 @@ class CharacterPanel {
             
             const initiativeValue = parseInt(initiative) || 0;
             
-            // Add to initiative tracker via API
-            const response = await api.post('/initiative', {
-                campaign_id: state.get('currentCampaignId'),
-                combatant_id: characterId,
+            // Update the character's initiative (characters already exist in combatants table)
+            const response = await api.put(`/characters/${characterId}`, {
                 initiative: initiativeValue
             });
             
-            if (response.success) {
-                // Update state
-                state.addCombatant({ ...character, initiative: initiativeValue });
+            if (response) {
+                // Update state - add to initiative tracker
+                const updatedCharacter = { ...character, initiative: initiativeValue };
+                state.addCombatant(updatedCharacter);
+                state.updateCharacter(characterId, { initiative: initiativeValue });
                 this.showSuccess(`${character.name} added to combat!`);
             }
         } catch (error) {
             console.error('Failed to add to combat:', error);
             this.showError('Failed to add character to combat');
+            // Don't modify state on error - existing data remains intact
         }
     }
 
