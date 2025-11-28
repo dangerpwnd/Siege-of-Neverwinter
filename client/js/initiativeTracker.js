@@ -35,14 +35,36 @@ class InitiativeTracker {
     setupEventListeners() {
         // Event delegation for dynamic elements
         this.container.addEventListener('click', (e) => {
+            // Remove combatant
             if (e.target.classList.contains('remove-combatant-btn')) {
+                e.preventDefault();
                 const id = parseInt(e.target.dataset.id);
                 this.removeCombatant(id);
             }
             
+            // Edit initiative
             if (e.target.classList.contains('edit-initiative-btn')) {
+                e.preventDefault();
                 const id = parseInt(e.target.dataset.id);
                 this.editInitiative(id);
+            }
+            
+            // Next turn button
+            if (e.target.id === 'next-turn-btn') {
+                e.preventDefault();
+                this.nextTurn();
+            }
+            
+            // Add combatant button
+            if (e.target.id === 'add-combatant-btn') {
+                e.preventDefault();
+                this.showAddCombatantForm();
+            }
+            
+            // Clear initiative button
+            if (e.target.id === 'clear-initiative-btn') {
+                e.preventDefault();
+                this.clearInitiative();
             }
         });
     }
@@ -235,12 +257,6 @@ class InitiativeTracker {
                 </div>
             `;
             
-            // Add event listener for add button
-            const addBtn = document.getElementById('add-combatant-btn');
-            if (addBtn) {
-                addBtn.addEventListener('click', () => this.showAddCombatantForm());
-            }
-            
             return;
         }
 
@@ -283,22 +299,6 @@ class InitiativeTracker {
         `;
 
         this.container.innerHTML = html;
-
-        // Add event listeners for controls
-        const nextTurnBtn = document.getElementById('next-turn-btn');
-        if (nextTurnBtn) {
-            nextTurnBtn.addEventListener('click', () => this.nextTurn());
-        }
-
-        const addBtn = document.getElementById('add-combatant-btn');
-        if (addBtn) {
-            addBtn.addEventListener('click', () => this.showAddCombatantForm());
-        }
-
-        const clearBtn = document.getElementById('clear-initiative-btn');
-        if (clearBtn) {
-            clearBtn.addEventListener('click', () => this.clearInitiative());
-        }
     }
 
     /**
