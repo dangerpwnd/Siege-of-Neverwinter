@@ -206,14 +206,6 @@ class APIClient {
         return this.delete(`/characters/${id}`);
     }
 
-    async updateCharacter(id, data) {
-        return this.put(`/characters/${id}`, data);
-    }
-
-    async deleteCharacter(id) {
-        return this.delete(`/characters/${id}`);
-    }
-
     // NPC endpoints
     async getNPCs(campaignId) {
         return this.get(`/npcs?campaign_id=${campaignId}`);
