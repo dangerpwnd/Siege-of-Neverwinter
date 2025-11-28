@@ -7,10 +7,17 @@ class CharacterPanel {
     constructor() {
         this.container = document.getElementById('character-content');
         this.selectedCharacterId = null;
+        this.referenceData = {
+            races: [],
+            classes: [],
+            subclasses: [],
+            backgrounds: []
+        };
         this.init();
     }
 
-    init() {
+    async init() {
+        await this.loadReferenceData();
         this.render();
         this.setupEventListeners();
         
@@ -23,6 +30,26 @@ class CharacterPanel {
                 this.render();
             }
         });
+    }
+
+    async loadReferenceData() {
+        try {
+            const [races, classes, subclasses, backgrounds] = await Promise.all([
+                api.get('/reference/races'),
+                api.get('/reference/classes'),
+                api.get('/reference/subclasses'),
+                api.get('/reference/backgrounds')
+            ]);
+            
+            this.referenceData = {
+                races: races.data || [],
+                classes: classes.data || [],
+                subclasses: subclasses.data || [],
+                backgrounds: backgrounds.data || []
+            };
+        } catch (error) {
+            console.error('Failed to load reference data:', error);
+        }
     }
 
     setupEventListeners() {
@@ -878,23 +905,20 @@ class CharacterPanel {
     }
 
     getSubclassOptions(characterClass) {
-        const subclasses = {
-            'Artificer': ['Alchemist', 'Armorer', 'Artillerist', 'Battle Smith'],
-            'Barbarian': ['Path of the Berserker', 'Path of the Totem Warrior', 'Path of the Ancestral Guardian', 'Path of the Storm Herald', 'Path of the Zealot', 'Path of the Beast', 'Path of Wild Magic'],
-            'Bard': ['College of Lore', 'College of Valor', 'College of Glamour', 'College of Swords', 'College of Whispers', 'College of Creation', 'College of Eloquence'],
-            'Cleric': ['Knowledge Domain', 'Life Domain', 'Light Domain', 'Nature Domain', 'Tempest Domain', 'Trickery Domain', 'War Domain', 'Death Domain', 'Forge Domain', 'Grave Domain', 'Order Domain', 'Peace Domain', 'Twilight Domain'],
-            'Druid': ['Circle of the Land', 'Circle of the Moon', 'Circle of Dreams', 'Circle of the Shepherd', 'Circle of Spores', 'Circle of Stars', 'Circle of Wildfire'],
-            'Fighter': ['Champion', 'Battle Master', 'Eldritch Knight', 'Arcane Archer', 'Cavalier', 'Samurai', 'Echo Knight', 'Psi Warrior', 'Rune Knight'],
-            'Monk': ['Way of the Open Hand', 'Way of Shadow', 'Way of the Four Elements', 'Way of the Drunken Master', 'Way of the Kensei', 'Way of the Sun Soul', 'Way of Mercy', 'Way of the Astral Self'],
-            'Paladin': ['Oath of Devotion', 'Oath of the Ancients', 'Oath of Vengeance', 'Oath of Conquest', 'Oath of Redemption', 'Oath of Glory', 'Oath of the Watchers', 'Oathbreaker'],
-            'Ranger': ['Hunter', 'Beast Master', 'Gloom Stalker', 'Horizon Walker', 'Monster Slayer', 'Fey Wanderer', 'Swarmkeeper', 'Drakewarden'],
-            'Rogue': ['Thief', 'Assassin', 'Arcane Trickster', 'Inquisitive', 'Mastermind', 'Scout', 'Swashbuckler', 'Phantom', 'Soulknife'],
-            'Sorcerer': ['Draconic Bloodline', 'Wild Magic', 'Divine Soul', 'Shadow Magic', 'Storm Sorcery', 'Aberrant Mind', 'Clockwork Soul'],
-            'Warlock': ['The Archfey', 'The Fiend', 'The Great Old One', 'The Celestial', 'The Hexblade', 'The Fathomless', 'The Genie'],
-            'Wizard': ['School of Abjuration', 'School of Conjuration', 'School of Divination', 'School of Enchantment', 'School of Evocation', 'School of Illusion', 'School of Necromancy', 'School of Transmutation', 'Bladesinging', 'Order of Scribes']
-        };
-        
-        return subclasses[characterClass] || [];
+        return this.referenceData.subclasses
+            .filter(sub => sub.class_name === characterClass)
+            .map(sub => sub.name);
+    }
+
+    getRacesByFamily() {
+        const grouped = {};
+        this.referenceData.races.forEach(race => {
+            if (!grouped[race.race_family]) {
+                grouped[race.race_family] = [];
+            }
+            grouped[race.race_family].push(race.name);
+        });
+        return grouped;
     }
 
     displayFeatures(features) {
