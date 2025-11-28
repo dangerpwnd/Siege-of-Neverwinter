@@ -304,59 +304,186 @@ class InitiativeTracker {
     /**
      * Show form to add a new combatant
      */
-    showAddCombatantForm() {
-        const message = `Add combatants from the Character or Monster panels.
-
-For quick NPC/enemy addition:
-- Name: Enter combatant name
-- Type: PC, NPC, or Monster
-- Initiative: Roll or enter value
-- AC: Armor Class
-- HP: Hit Points`;
-
-        const name = prompt(message + '\n\nCombatant name:');
-        if (name === null || !name.trim()) return;
-
-        const type = prompt('Type (PC/NPC/Monster):', 'NPC');
-        if (type === null) return;
+    async showAddCombatantForm() {
+        // Get available characters, NPCs, and monsters
+        const characters = state.get('characters') || [];
+        const combatants = state.get('combatants') || [];
+        const monsters = state.get('monsters') || [];
         
-        if (!['PC', 'NPC', 'Monster'].includes(type)) {
-            alert('Invalid type. Must be PC, NPC, or Monster');
-            return;
-        }
-
-        const initiative = prompt('Initiative:', '10');
-        if (initiative === null) return;
+        // Filter out those already in combat
+        const combatantIds = new Set(combatants.map(c => c.id));
+        const availableCharacters = characters.filter(c => !combatantIds.has(c.id));
         
-        const ac = prompt('AC:', '15');
-        if (ac === null) return;
+        // Show selection dialog
+        this.showCombatantSelectionDialog(availableCharacters, monsters);
+    }
+
+    /**
+     * Show dialog to select combatant to add
+     */
+    showCombatantSelectionDialog(characters, monsters) {
+        const dialogHTML = `
+            <div class="modal-overlay" id="add-combatant-modal">
+                <div class="modal-dialog">
+                    <div class="modal-header">
+                        <h3>Add to Combat</h3>
+                        <button class="modal-close" data-action="close-modal">×</button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="combatant-selection">
+                            ${characters.length > 0 ? `
+                                <div class="selection-section">
+                                    <h4>Characters</h4>
+                                    <div class="selection-list">
+                                        ${characters.map(char => `
+                                            <div class="selection-item" data-type="character" data-id="${char.id}">
+                                                <div class="item-info">
+                                                    <span class="item-name">${this.escapeHtml(char.name)}</span>
+                                                    <span class="item-details">
+                                                        ${char.character_class ? `${char.character_class} ${char.level || ''}` : 'PC'}
+                                                        - AC ${char.ac}, HP ${char.max_hp}
+                                                    </span>
+                                                </div>
+                                                <button class="btn btn-small btn-primary" data-action="select-combatant" data-type="character" data-id="${char.id}">
+                                                    Add
+                                                </button>
+                                            </div>
+                                        `).join('')}
+                                    </div>
+                                </div>
+                            ` : '<p class="no-options">No characters available. Create characters in the Character panel.</p>'}
+                            
+                            ${monsters.length > 0 ? `
+                                <div class="selection-section">
+                                    <h4>Monsters</h4>
+                                    <div class="selection-list">
+                                        ${monsters.map(monster => `
+                                            <div class="selection-item" data-type="monster" data-id="${monster.id}">
+                                                <div class="item-info">
+                                                    <span class="item-name">${this.escapeHtml(monster.name)}</span>
+                                                    <span class="item-details">
+                                                        CR ${monster.cr || '0'} - AC ${monster.ac}, HP ${monster.hp_formula || 'N/A'}
+                                                    </span>
+                                                </div>
+                                                <button class="btn btn-small btn-primary" data-action="select-combatant" data-type="monster" data-id="${monster.id}">
+                                                    Add
+                                                </button>
+                                            </div>
+                                        `).join('')}
+                                    </div>
+                                </div>
+                            ` : '<p class="no-options">No monsters available. Add monsters in the Monster Database.</p>'}
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button class="btn btn-secondary" data-action="close-modal">Cancel</button>
+                    </div>
+                </div>
+            </div>
+        `;
         
-        const maxHp = prompt('Max HP:', '50');
-        if (maxHp === null) return;
+        // Add to DOM
+        const modalContainer = document.createElement('div');
+        modalContainer.innerHTML = dialogHTML;
+        document.body.appendChild(modalContainer.firstElementChild);
+        
+        // Add event listeners
+        this.setupModalListeners();
+    }
 
-        const combatantData = {
-            name: name.trim(),
-            type: type,
-            initiative: parseInt(initiative) || 0,
-            ac: parseInt(ac) || 10,
-            current_hp: parseInt(maxHp) || 1,
-            max_hp: parseInt(maxHp) || 1,
-            save_strength: 0,
-            save_dexterity: 0,
-            save_constitution: 0,
-            save_intelligence: 0,
-            save_wisdom: 0,
-            save_charisma: 0
-        };
-
-        this.addCombatant(combatantData)
-            .then(() => {
-                console.log('Combatant added successfully');
-            })
-            .catch(error => {
-                console.error('Failed to add combatant:', error);
-                alert('Failed to add combatant. Please try again.');
+    /**
+     * Setup modal event listeners
+     */
+    setupModalListeners() {
+        const modal = document.getElementById('add-combatant-modal');
+        if (!modal) return;
+        
+        // Close modal
+        modal.addEventListener('click', (e) => {
+            if (e.target.dataset.action === 'close-modal' || e.target.id === 'add-combatant-modal') {
+                modal.remove();
+            }
+            
+            // Select combatant
+            if (e.target.dataset.action === 'select-combatant') {
+                e.preventDefault();
+                const type = e.target.dataset.type;
+                const id = parseInt(e.target.dataset.id);
+                this.addSelectedCombatant(type, id);
+                modal.remove();
+            }
+        });
+        
+        // Prevent closing when clicking inside dialog
+        const dialog = modal.querySelector('.modal-dialog');
+        if (dialog) {
+            dialog.addEventListener('click', (e) => {
+                e.stopPropagation();
             });
+        }
+    }
+
+    /**
+     * Add selected combatant to initiative
+     */
+    async addSelectedCombatant(type, id) {
+        try {
+            if (type === 'character') {
+                const character = state.getCharacterById(id);
+                if (!character) {
+                    alert('Character not found');
+                    return;
+                }
+                
+                const initiative = prompt(`Enter initiative for ${character.name}:`, '10');
+                if (initiative === null) return;
+                
+                await api.post('/initiative', {
+                    campaign_id: state.get('currentCampaignId'),
+                    combatant_id: id,
+                    initiative: parseInt(initiative) || 0
+                });
+                
+                state.addCombatant({ ...character, initiative: parseInt(initiative) || 0 });
+                
+            } else if (type === 'monster') {
+                const monsters = state.get('monsters') || [];
+                const monster = monsters.find(m => m.id === id);
+                if (!monster) {
+                    alert('Monster not found');
+                    return;
+                }
+                
+                const instanceName = prompt(`Instance name:`, monster.name);
+                if (instanceName === null) return;
+                
+                const initiative = prompt('Initiative:', '10');
+                if (initiative === null) return;
+                
+                const response = await api.post(`/monsters/${id}/instances`, {
+                    instance_name: instanceName.trim(),
+                    initiative: parseInt(initiative) || 0
+                });
+                
+                if (response.success && response.data) {
+                    const combatant = response.data.combatant;
+                    state.addCombatant(combatant);
+                }
+            }
+        } catch (error) {
+            console.error('Failed to add combatant:', error);
+            alert('Failed to add combatant. Please try again.');
+        }
+    }
+
+    /**
+     * Escape HTML to prevent XSS
+     */
+    escapeHtml(text) {
+        if (!text) return '';
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
     }
 
     /**
