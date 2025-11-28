@@ -64,14 +64,35 @@ class CharacterPanel {
             }
         });
 
-        // HP input change
+        // HP input change and class selection change
         this.container.addEventListener('change', (e) => {
             if (e.target.id === 'character-hp-input') {
                 const characterId = parseInt(e.target.dataset.characterId);
                 const newHP = parseInt(e.target.value);
                 this.setHP(characterId, newHP);
             }
+            
+            // Class selection change - update subclass options
+            if (e.target.id === 'char-class') {
+                this.updateSubclassOptions(e.target.value);
+            }
         });
+    }
+
+    updateSubclassOptions(selectedClass) {
+        const subclassSelect = document.getElementById('char-subclass');
+        if (!subclassSelect) return;
+        
+        if (!selectedClass) {
+            subclassSelect.disabled = true;
+            subclassSelect.innerHTML = '<option value="">Select class first</option>';
+            return;
+        }
+        
+        const subclasses = this.getSubclassOptions(selectedClass);
+        subclassSelect.disabled = false;
+        subclassSelect.innerHTML = '<option value="">Select subclass</option>' + 
+            subclasses.map(sub => `<option value="${this.escapeHtml(sub)}">${this.escapeHtml(sub)}</option>`).join('');
     }
 
     async loadCharacters() {
@@ -146,7 +167,7 @@ class CharacterPanel {
                     <h3>${this.escapeHtml(character.name)}</h3>
                     <div class="character-info">
                         ${character.character_class && character.level ? 
-                            `<span class="character-class">${this.escapeHtml(character.character_class)} ${character.level}</span>` 
+                            `<span class="character-class">${this.escapeHtml(character.character_class)} ${character.level}${character.subclass ? ` (${this.escapeHtml(character.subclass)})` : ''}</span>` 
                             : ''}
                         ${character.background ? 
                             `<span class="character-background">${this.escapeHtml(character.background)}</span>` 
@@ -284,6 +305,13 @@ class CharacterPanel {
                             <label for="char-level">Level</label>
                             <input type="number" id="char-level" min="1" max="20" value="1" />
                         </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="char-subclass">Subclass</label>
+                        <select id="char-subclass" disabled>
+                            <option value="">Select class first</option>
+                        </select>
                     </div>
                     
                     <div class="form-row">
@@ -435,6 +463,16 @@ class CharacterPanel {
                         </div>
                     </div>
                     
+                    <div class="form-group">
+                        <label for="char-subclass">Subclass</label>
+                        <select id="char-subclass" ${!character.character_class ? 'disabled' : ''}>
+                            <option value="">Select subclass</option>
+                            ${character.character_class ? this.getSubclassOptions(character.character_class).map(sub => 
+                                `<option value="${sub}" ${character.subclass === sub ? 'selected' : ''}>${sub}</option>`
+                            ).join('') : ''}
+                        </select>
+                    </div>
+                    
                     <div class="form-row">
                         <div class="form-group">
                             <label for="char-background">Background</label>
@@ -555,6 +593,7 @@ class CharacterPanel {
                 campaign_id: state.get('currentCampaignId'),
                 name: document.getElementById('char-name').value,
                 character_class: document.getElementById('char-class').value,
+                subclass: document.getElementById('char-subclass').value,
                 level: parseInt(document.getElementById('char-level').value) || 1,
                 background: document.getElementById('char-background').value,
                 alignment: document.getElementById('char-alignment').value,
@@ -628,6 +667,26 @@ class CharacterPanel {
                 </div>
             </div>
         `;
+    }
+
+    getSubclassOptions(characterClass) {
+        const subclasses = {
+            'Artificer': ['Alchemist', 'Armorer', 'Artillerist', 'Battle Smith'],
+            'Barbarian': ['Path of the Berserker', 'Path of the Totem Warrior', 'Path of the Ancestral Guardian', 'Path of the Storm Herald', 'Path of the Zealot', 'Path of the Beast', 'Path of Wild Magic'],
+            'Bard': ['College of Lore', 'College of Valor', 'College of Glamour', 'College of Swords', 'College of Whispers', 'College of Creation', 'College of Eloquence'],
+            'Cleric': ['Knowledge Domain', 'Life Domain', 'Light Domain', 'Nature Domain', 'Tempest Domain', 'Trickery Domain', 'War Domain', 'Death Domain', 'Forge Domain', 'Grave Domain', 'Order Domain', 'Peace Domain', 'Twilight Domain'],
+            'Druid': ['Circle of the Land', 'Circle of the Moon', 'Circle of Dreams', 'Circle of the Shepherd', 'Circle of Spores', 'Circle of Stars', 'Circle of Wildfire'],
+            'Fighter': ['Champion', 'Battle Master', 'Eldritch Knight', 'Arcane Archer', 'Cavalier', 'Samurai', 'Echo Knight', 'Psi Warrior', 'Rune Knight'],
+            'Monk': ['Way of the Open Hand', 'Way of Shadow', 'Way of the Four Elements', 'Way of the Drunken Master', 'Way of the Kensei', 'Way of the Sun Soul', 'Way of Mercy', 'Way of the Astral Self'],
+            'Paladin': ['Oath of Devotion', 'Oath of the Ancients', 'Oath of Vengeance', 'Oath of Conquest', 'Oath of Redemption', 'Oath of Glory', 'Oath of the Watchers', 'Oathbreaker'],
+            'Ranger': ['Hunter', 'Beast Master', 'Gloom Stalker', 'Horizon Walker', 'Monster Slayer', 'Fey Wanderer', 'Swarmkeeper', 'Drakewarden'],
+            'Rogue': ['Thief', 'Assassin', 'Arcane Trickster', 'Inquisitive', 'Mastermind', 'Scout', 'Swashbuckler', 'Phantom', 'Soulknife'],
+            'Sorcerer': ['Draconic Bloodline', 'Wild Magic', 'Divine Soul', 'Shadow Magic', 'Storm Sorcery', 'Aberrant Mind', 'Clockwork Soul'],
+            'Warlock': ['The Archfey', 'The Fiend', 'The Great Old One', 'The Celestial', 'The Hexblade', 'The Fathomless', 'The Genie'],
+            'Wizard': ['School of Abjuration', 'School of Conjuration', 'School of Divination', 'School of Enchantment', 'School of Evocation', 'School of Illusion', 'School of Necromancy', 'School of Transmutation', 'Bladesinging', 'Order of Scribes']
+        };
+        
+        return subclasses[characterClass] || [];
     }
 
     displayFeatures(features) {
