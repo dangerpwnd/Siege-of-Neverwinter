@@ -4,12 +4,17 @@ const Combatant = require('../models/Combatant');
 
 /**
  * GET /api/initiative
- * Get all combatants in initiative order for a campaign
+ * Get combatants currently in initiative tracker for a campaign
+ * Only returns combatants with initiative > 0 (actively in combat)
  */
 router.get('/', async (req, res, next) => {
   try {
     const campaignId = req.query.campaign_id || 1;
-    const combatants = await Combatant.findByCampaignWithConditions(campaignId);
+    const allCombatants = await Combatant.findByCampaignWithConditions(campaignId);
+    
+    // Filter to only include combatants with initiative > 0 (in combat)
+    // PCs and NPCs with initiative = 0 are not in combat
+    const combatants = allCombatants.filter(c => c.initiative > 0);
     
     res.json({
       success: true,
