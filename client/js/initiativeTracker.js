@@ -735,13 +735,13 @@ class InitiativeTracker {
 
     async addCondition(combatantId, condition) {
         try {
-            await api.post(`/combatants/${combatantId}/conditions`, { condition });
+            const response = await api.post(`/combatants/${combatantId}/conditions`, { condition });
             
-            const combatant = state.getCombatantById(combatantId);
-            if (combatant) {
-                const conditions = combatant.conditions || [];
-                conditions.push({ condition });
-                state.updateCombatant(combatantId, { conditions });
+            // Reload combatant to get condition with ID
+            const combatantResponse = await api.get(`/combatants/${combatantId}/conditions`);
+            
+            if (combatantResponse.success && combatantResponse.data) {
+                state.updateCombatant(combatantId, { conditions: combatantResponse.data });
             }
             
             this.render();
@@ -757,27 +757,20 @@ class InitiativeTracker {
         }
         
         try {
-            // If conditionId is numeric, it's a database ID
-            if (!isNaN(conditionId)) {
-                await api.delete(`/combatants/${combatantId}/conditions/${conditionId}`);
-            }
+            // Delete from database
+            await api.delete(`/combatants/${combatantId}/conditions/${conditionId}`);
             
-            // Update state - remove condition from array
-            const combatant = state.getCombatantById(combatantId);
-            if (combatant && combatant.conditions) {
-                const conditions = combatant.conditions.filter((c, index) => {
-                    if (typeof c === 'object' && c.id) {
-                        return c.id != conditionId;
-                    }
-                    return index != conditionId;
-                });
-                state.updateCombatant(combatantId, { conditions });
+            // Reload conditions to ensure sync
+            const combatantResponse = await api.get(`/combatants/${combatantId}/conditions`);
+            
+            if (combatantResponse.success && combatantResponse.data) {
+                state.updateCombatant(combatantId, { conditions: combatantResponse.data });
             }
             
             this.render();
         } catch (error) {
             console.error('Failed to remove condition:', error);
-            alert('Failed to remove condition');
+            alert('Failed to remove condition. Error: ' + error.message);
         }
     }
 
