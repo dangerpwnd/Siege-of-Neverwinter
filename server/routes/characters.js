@@ -78,6 +78,7 @@ router.post('/', async (req, res, next) => {
       save_wisdom = 0,
       save_charisma = 0,
       character_class,
+      subclass,
       level,
       background,
       alignment,
@@ -98,14 +99,14 @@ router.post('/', async (req, res, next) => {
         campaign_id, name, type, initiative, ac, current_hp, max_hp,
         save_strength, save_dexterity, save_constitution,
         save_intelligence, save_wisdom, save_charisma,
-        character_class, level, background, alignment, notes, features, magical_items
-      ) VALUES ($1, $2, 'PC', $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19)
+        character_class, subclass, level, background, alignment, notes, features, magical_items
+      ) VALUES ($1, $2, 'PC', $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20)
       RETURNING *`,
       [
         campaign_id, name, initiative, ac, current_hp, max_hp,
         save_strength, save_dexterity, save_constitution,
         save_intelligence, save_wisdom, save_charisma,
-        character_class, level, background, alignment, notes, JSON.stringify(features), JSON.stringify(magical_items)
+        character_class, subclass, level, background, alignment, notes, JSON.stringify(features), JSON.stringify(magical_items)
       ]
     );
     
@@ -135,6 +136,7 @@ router.put('/:id', async (req, res, next) => {
       save_wisdom,
       save_charisma,
       character_class,
+      subclass,
       level,
       background,
       alignment,
@@ -193,6 +195,10 @@ router.put('/:id', async (req, res, next) => {
     if (character_class !== undefined) {
       updates.push(`character_class = $${paramCount++}`);
       values.push(character_class);
+    }
+    if (subclass !== undefined) {
+      updates.push(`subclass = $${paramCount++}`);
+      values.push(subclass);
     }
     if (level !== undefined) {
       updates.push(`level = $${paramCount++}`);
