@@ -17,6 +17,9 @@ class SiegeMechanics {
         this.render();
         this.loadSiegeState();
         
+        // Set up event listeners once
+        this.setupEventListeners();
+        
         // Subscribe to state changes
         state.subscribe((newState, oldState) => {
             if (newState.siegeState !== oldState.siegeState) {
@@ -305,15 +308,16 @@ class SiegeMechanics {
                 ${this.renderSiegeNotes()}
             </div>
         `;
-
-        // Add event listeners
-        this.setupEventListeners();
+        
+        // Reattach listeners for dynamically created elements (sliders, inputs)
+        this.setupDynamicListeners();
     }
 
     /**
-     * Set up event listeners
+     * Set up event listeners for dynamically created elements
+     * (called after each render)
      */
-    setupEventListeners() {
+    setupDynamicListeners() {
         // Metric sliders
         const sliders = this.container.querySelectorAll('.metric-slider');
         sliders.forEach(slider => {
@@ -350,32 +354,49 @@ class SiegeMechanics {
                 }
             });
         }
+    }
 
-        // Button actions
-        this.container.addEventListener('click', (e) => {
+    /**
+     * Set up event listeners that only need to be attached once
+     * (using event delegation on the container)
+     */
+    setupEventListeners() {
+        // Button actions (event delegation - only set up once)
+        this.container.addEventListener('click', async (e) => {
             const action = e.target.dataset.action;
+            
+            if (!action) return; // No action, ignore
+            
+            // Stop event propagation to prevent multiple triggers
+            e.stopPropagation();
+            e.preventDefault();
             
             if (action === 'add-note') {
                 const textarea = document.getElementById('new-note-text');
                 if (textarea && textarea.value.trim()) {
-                    this.addNote(textarea.value.trim());
+                    await this.addNote(textarea.value.trim());
                     textarea.value = '';
                 }
             } else if (action === 'delete-note') {
                 const noteId = e.target.dataset.id;
                 console.log('Delete note button clicked, ID:', noteId);
+                
+                // Disable the button to prevent multiple clicks
+                e.target.disabled = true;
+                
                 if (confirm('Delete this note?')) {
                     console.log('User confirmed deletion');
-                    this.deleteNote(noteId);
+                    await this.deleteNote(noteId);
                 } else {
                     console.log('User cancelled deletion');
+                    e.target.disabled = false;
                 }
             } else if (action === 'add-custom-metric') {
                 this.showAddCustomMetricDialog();
             } else if (action === 'remove-metric') {
                 const metricName = e.target.dataset.name;
                 if (confirm(`Remove custom metric "${metricName}"?`)) {
-                    this.removeCustomMetric(metricName);
+                    await this.removeCustomMetric(metricName);
                 }
             }
         });
