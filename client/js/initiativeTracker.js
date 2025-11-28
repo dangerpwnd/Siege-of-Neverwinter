@@ -651,6 +651,8 @@ class InitiativeTracker {
 
     /**
      * Clear all combatants from initiative
+     * Only deletes monster instances from database
+     * PCs and NPCs are just removed from the tracker
      */
     async clearInitiative() {
         if (!confirm('Are you sure you want to clear all combatants from initiative?')) {
@@ -660,12 +662,15 @@ class InitiativeTracker {
         const combatants = state.get('combatants');
         
         try {
-            // Delete all combatants
+            // Only delete monster instances from database
+            // PCs and NPCs remain in database for re-use
             for (const combatant of combatants) {
-                await api.delete(`/initiative/${combatant.id}`);
+                if (combatant.type === 'Monster') {
+                    await api.delete(`/initiative/${combatant.id}`);
+                }
             }
             
-            // Clear state
+            // Clear initiative tracker state
             state.setState({ combatants: [], currentTurnIndex: 0 });
         } catch (error) {
             console.error('Failed to clear initiative:', error);
