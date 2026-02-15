@@ -4056,3 +4056,122 @@ a {
     color: var(--text-dim);
     font-style: italic;
 }
+
+/* ===================================
+   Browser Compatibility Styles
+   =================================== */
+
+/* Browser compatibility warning */
+.browser-warning {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    background: #fff3cd;
+    border-bottom: 3px solid #ffc107;
+    padding: 20px;
+    z-index: 10000;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.browser-warning h3 {
+    margin: 0 0 10px 0;
+    color: #856404;
+    font-size: 1.2em;
+}
+
+.browser-warning ul {
+    margin: 10px 0;
+    padding-left: 20px;
+    color: #856404;
+}
+
+.browser-warning li {
+    margin: 5px 0;
+}
+
+.browser-warning p {
+    margin: 10px 0;
+    color: #856404;
+}
+
+.browser-warning button {
+    background: #ffc107;
+    color: #000;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+.browser-warning button:hover {
+    background: #e0a800;
+}
+
+/* Layout feedback notification */
+.layout-feedback {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background: var(--accent-color);
+    color: white;
+    padding: 15px 20px;
+    border-radius: var(--radius-md);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    opacity: 0;
+    transform: translateY(20px);
+    transition: all 0.3s ease;
+    z-index: 9999;
+    font-weight: bold;
+}
+
+.layout-feedback.show {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* Drag and drop visual feedback */
+.dragging {
+    opacity: 0.5;
+    cursor: move;
+}
+
+.drag-over {
+    background: rgba(139, 92, 246, 0.1);
+    border: 2px dashed var(--accent-color);
+}
+
+/* Browser-specific fixes */
+
+/* Safari flexbox fix */
+@supports (-webkit-appearance: none) {
+    .module-content {
+        /* Safari sometimes needs explicit height for flexbox children */
+        min-height: 0;
+    }
+}
+
+/* Firefox scrollbar styling (different from webkit) */
+@-moz-document url-prefix() {
+    .module-content {
+        scrollbar-width: thin;
+        scrollbar-color: var(--accent-color) var(--bg-dark);
+    }
+    
+    .conversation-history {
+        scrollbar-width: thin;
+        scrollbar-color: #6b7280 #e5e7eb;
+    }
+}
+
+/* CSS Grid gap fallback for older Safari */
+.module-grid {
+    grid-gap: var(--spacing-lg); /* Fallback */
+    gap: var(--spacing-lg); /* Modern */
+}
+
+/* Ensure proper box-sizing across all browsers */
+*, *::before, *::after {
+    box-sizing: border-box;
+}
