@@ -16,6 +16,7 @@ Complete REST API reference for the Siege of Neverwinter application.
 11. [Locations API](#locations-api)
 12. [Plot Points API](#plot-points-api)
 13. [Preferences API](#preferences-api)
+14. [AI Assistant API](#ai-assistant-api)
 
 ## Overview
 
@@ -1078,6 +1079,112 @@ PUT /api/preferences
   }
 }
 ```
+
+## AI Assistant API
+
+The AI Assistant routes proxy requests to OpenAI and Anthropic through the backend, keeping API keys off the client.
+
+### Send AI Message
+
+```http
+POST /api/ai/message
+```
+
+**Request Body**:
+```json
+{
+  "provider": "chatgpt",
+  "apiKey": "sk-...",
+  "messages": [
+    { "role": "user", "content": "Describe the siege scene" }
+  ],
+  "campaignContext": {
+    "siegeState": { "day_of_siege": 5, "wall_integrity": 90, "defender_morale": 85, "supplies": 75 },
+    "combatants": []
+  }
+}
+```
+
+**Parameters**:
+- `provider` (required) - `"chatgpt"` or `"claude"`
+- `apiKey` (required) - The provider's API key
+- `messages` (required) - Array of conversation messages (`role` / `content`)
+- `campaignContext` (optional) - Current siege state and combatants for richer responses
+
+**Response**:
+```json
+{
+  "response": "The walls of Neverwinter shudder as another volley...",
+  "provider": "chatgpt"
+}
+```
+
+**Error Response**:
+```json
+{
+  "error": "Invalid provider. Must be \"chatgpt\" or \"claude\".",
+  "provider": "chatgpt"
+}
+```
+
+### Validate API Key
+
+```http
+POST /api/ai/validate-key
+```
+
+**Request Body**:
+```json
+{
+  "provider": "chatgpt",
+  "apiKey": "sk-..."
+}
+```
+
+**Response**:
+```json
+{
+  "valid": true
+}
+```
+
+### Get AI Provider Preference
+
+```http
+GET /api/ai/provider?campaign_id=1
+```
+
+**Response**:
+```json
+{
+  "provider": "chatgpt"
+}
+```
+
+### Set AI Provider Preference
+
+```http
+PUT /api/ai/provider
+```
+
+**Request Body**:
+```json
+{
+  "provider": "claude",
+  "campaign_id": 1
+}
+```
+
+**Response**:
+```json
+{
+  "success": true,
+  "provider": "claude",
+  "clearHistory": true
+}
+```
+
+`clearHistory` is `true` when the provider changed, signaling the client to reset conversation history.
 
 ## Rate Limiting
 

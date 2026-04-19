@@ -74,7 +74,7 @@ The key will look like: `sk-proj-...` (starts with `sk-`)
    npm start
    ```
 
-#### Option B: Browser Storage (Recommended for Client)
+#### Option B: Browser Storage
 
 1. Start the application and open it in your browser
 2. Navigate to the AI Assistant module
@@ -84,7 +84,7 @@ The key will look like: `sk-proj-...` (starts with `sk-`)
 6. Click "Save"
 7. The key is stored in your browser's local storage under `openai_api_key`
 
-**Note**: Option B is more secure as the key never touches the server or version control.
+> **Note**: API keys entered in the browser are sent to the backend proxy (`/api/ai/message`) with each request and forwarded to the provider. They are not stored on the server.
 
 ### Step 5: Test the Connection
 
@@ -132,13 +132,15 @@ The key will look like: `sk-ant-...` (starts with `sk-ant-`)
    ```
 3. Save the file and restart the server
 
-#### Option B: Browser Storage (Recommended)
+#### Option B: Browser Storage
 
 1. Open the AI Assistant module
 2. Select "Anthropic (Claude)" as the provider
 3. Paste your API key
 4. Click "Save"
 5. The key is stored in your browser's local storage under `anthropic_api_key`
+
+> **Note**: API keys entered in the browser are sent to the backend proxy (`/api/ai/message`) with each request and forwarded to the provider. They are not stored on the server.
 
 ## Switching Providers
 
@@ -154,6 +156,8 @@ Your provider preference is saved in local storage (`ai_provider`) and persists 
 ## Security Best Practices
 
 ### Protecting Your API Key
+
+> **Architecture note**: AI requests are routed through a backend proxy (`POST /api/ai/message`). The client sends the API key with each request; the server forwards it to the provider and builds the system prompt server-side. Keys are never logged or persisted on the server.
 
 **DO**:
 - ✅ Store keys in environment variables

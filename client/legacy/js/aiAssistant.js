@@ -154,80 +154,74 @@ Provide concise, actionable responses that help the DM run an engaging game.`;
     }
 
     /**
-     * Call OpenAI ChatGPT API
+     * Call OpenAI ChatGPT API via backend proxy
      */
     async callChatGPT(userMessage) {
         const messages = [
-            { role: 'system', content: this.getSystemPrompt() },
             ...this.conversationHistory
         ];
 
-        const response = await fetch(PROVIDERS.openai.endpoint, {
+        const campaignContext = {
+            siegeState: state.get('siegeState'),
+            combatants: state.get('combatants')
+        };
+
+        const response = await fetch('/api/ai/message', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'Authorization': `Bearer ${this.apiKeys.openai}`
             },
             body: JSON.stringify({
-                model: 'gpt-4',
+                provider: 'chatgpt',
+                apiKey: this.apiKeys.openai,
                 messages,
-                temperature: 0.7,
-                max_tokens: 500,
-                presence_penalty: 0.3,
-                frequency_penalty: 0.3
+                campaignContext
             })
         });
 
         if (!response.ok) {
-            if (response.status === 401) throw new Error('Invalid API key');
-            if (response.status === 429) throw new Error('Rate limit exceeded. Please wait and try again.');
-            throw new Error(`API error: ${response.status}`);
+            const errorData = await response.json().catch(() => ({}));
+            throw new Error(errorData.error || `API error: ${response.status}`);
         }
 
         const data = await response.json();
-        if (!data.choices || data.choices.length === 0) {
-            throw new Error('No response from API');
-        }
-        return data.choices[0].message.content;
+        return data.response;
     }
 
     /**
-     * Call Anthropic Claude API
+     * Call Anthropic Claude API via backend proxy
      */
     async callClaude(userMessage) {
-        // Claude uses a separate system param and expects alternating user/assistant messages
         const messages = this.conversationHistory.map(msg => ({
             role: msg.role,
             content: msg.content
         }));
 
-        const response = await fetch(PROVIDERS.anthropic.endpoint, {
+        const campaignContext = {
+            siegeState: state.get('siegeState'),
+            combatants: state.get('combatants')
+        };
+
+        const response = await fetch('/api/ai/message', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'x-api-key': this.apiKeys.anthropic,
-                'anthropic-version': '2023-06-01',
-                'anthropic-dangerous-direct-browser-access': 'true'
             },
             body: JSON.stringify({
-                model: 'claude-sonnet-4-20250514',
-                max_tokens: 500,
-                system: this.getSystemPrompt(),
-                messages
+                provider: 'claude',
+                apiKey: this.apiKeys.anthropic,
+                messages,
+                campaignContext
             })
         });
 
         if (!response.ok) {
-            if (response.status === 401) throw new Error('Invalid API key');
-            if (response.status === 429) throw new Error('Rate limit exceeded. Please wait and try again.');
-            throw new Error(`API error: ${response.status}`);
+            const errorData = await response.json().catch(() => ({}));
+            throw new Error(errorData.error || `API error: ${response.status}`);
         }
 
         const data = await response.json();
-        if (!data.content || data.content.length === 0) {
-            throw new Error('No response from API');
-        }
-        return data.content[0].text;
+        return data.response;
     }
 
     /**

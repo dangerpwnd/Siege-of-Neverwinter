@@ -51,6 +51,24 @@ async function setupDatabase() {
         // Execute schema
         console.log('Creating tables...');
         await pool.query(schema);
+
+        // Run additional migrations in order
+        const migrations = [
+            'add-race.sql',
+            'add-subclass.sql',
+            'add-background-alignment.sql',
+            'add-features-items.sql',
+            'add-reference-tables.sql',
+        ];
+
+        for (const file of migrations) {
+            const filePath = path.join(__dirname, file);
+            if (fs.existsSync(filePath)) {
+                const sql = fs.readFileSync(filePath, 'utf8');
+                await pool.query(sql);
+                console.log(`Applied migration: ${file}`);
+            }
+        }
         
         console.log('Database setup completed successfully!');
         console.log('Default campaign created with ID: 1');

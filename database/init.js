@@ -82,6 +82,27 @@ async function runMigration(pool) {
     
     // Execute schema
     await pool.query(schema);
+    logSuccess('Base schema created');
+
+    // Run additional migrations in order
+    const migrations = [
+      'add-race.sql',
+      'add-subclass.sql',
+      'add-background-alignment.sql',
+      'add-features-items.sql',
+      'add-reference-tables.sql',
+    ];
+
+    for (const file of migrations) {
+      const filePath = path.join(__dirname, file);
+      if (fs.existsSync(filePath)) {
+        const sql = fs.readFileSync(filePath, 'utf8');
+        await pool.query(sql);
+        logSuccess(`Applied migration: ${file}`);
+      } else {
+        logWarning(`Migration file not found, skipping: ${file}`);
+      }
+    }
     
     logSuccess('Database schema created successfully');
     return true;

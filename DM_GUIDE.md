@@ -401,7 +401,8 @@ After seeding, you'll have 5 plot points:
 
 1. **Auto-Save**: Data saves automatically, but use manual save before closing
 2. **Backup**: Export campaign data periodically (future feature)
-3. **New Campaign**: Use "Reset Campaign" to start fresh
+3. **New Campaign**: Use "New" to create a fresh campaign
+4. **Delete Campaign**: Use the "Delete" button to permanently remove the active campaign and all its associated data
 
 ### Performance Tips
 

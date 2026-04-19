@@ -25,6 +25,11 @@ class SiegeOfNeverwinterApp {
 
         console.log('Initializing Siege of Neverwinter application...');
 
+        // Always set up event listeners and state subscriptions first
+        // so buttons work even if data loading fails
+        this.setupEventListeners();
+        this.subscribeToState();
+
         try {
             // Check API health
             await this.checkAPIHealth();
@@ -32,28 +37,34 @@ class SiegeOfNeverwinterApp {
             // Initialize campaign manager (loads last active campaign)
             const campaignId = await window.campaignManager.initialize();
             state.setState({ currentCampaignId: campaignId });
+        } catch (error) {
+            console.error('Failed to initialize campaign manager:', error);
+            this.showError('Failed to load campaign data. Some features may be limited.');
+        }
 
+        try {
             // Initialize layout manager (must be before module manager)
             await layoutManager.init();
+        } catch (error) {
+            console.error('Failed to initialize layout manager:', error);
+        }
 
+        try {
             // Initialize module system
             await moduleManager.init();
+        } catch (error) {
+            console.error('Failed to initialize module manager:', error);
+        }
 
-            // Set up event listeners
-            this.setupEventListeners();
-
-            // Subscribe to state changes
-            this.subscribeToState();
-
+        try {
             // Load initial data
             await this.loadInitialData();
-
-            this.initialized = true;
-            console.log('Application initialized successfully');
         } catch (error) {
-            console.error('Failed to initialize application:', error);
-            this.showError('Failed to initialize application. Please check your connection.');
+            console.error('Failed to load initial data:', error);
         }
+
+        this.initialized = true;
+        console.log('Application initialized successfully');
     }
 
     async checkAPIHealth() {
@@ -105,6 +116,27 @@ class SiegeOfNeverwinterApp {
                     await this.updateCampaignSelector();
                 } catch (error) {
                     this.showError('Failed to create new campaign');
+                }
+            });
+        }
+
+        // Delete campaign button
+        const deleteCampaignBtn = document.getElementById('delete-campaign-btn');
+        if (deleteCampaignBtn) {
+            deleteCampaignBtn.addEventListener('click', async () => {
+                const campaignId = window.campaignManager.getCurrentCampaignId();
+                if (!campaignId) return;
+
+                if (!confirm('Are you sure you want to delete this campaign? This cannot be undone.')) {
+                    return;
+                }
+
+                try {
+                    await window.campaignManager.deleteCampaign(campaignId);
+                    await this.updateCampaignSelector();
+                    this.showSuccess('Campaign deleted');
+                } catch (error) {
+                    this.showError('Failed to delete campaign');
                 }
             });
         }

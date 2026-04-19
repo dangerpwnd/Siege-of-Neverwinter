@@ -248,31 +248,45 @@ Migrations are versioned database changes that can be applied incrementally.
 
 ### Current Migration System
 
-The application uses a simple migration system:
+The migration script (`database/migrate.js`) applies the base schema first, then runs additional migration files in a fixed order:
+
+1. `schema.sql` — base tables and indexes
+2. `add-race.sql` — race column for characters
+3. `add-subclass.sql` — subclass support
+4. `add-background-alignment.sql` — background and alignment fields
+5. `add-features-items.sql` — class/racial features and magical items JSONB columns
+6. `add-reference-tables.sql` — D&D 5e reference data
+
+If a migration file is missing, it is skipped with a warning and the process continues.
 
 ```bash
-# Run all pending migrations
+# Run all migrations in order
 npm run db:migrate
 ```
 
-### Creating a New Migration
+### Adding a New Migration
 
-1. Create a new file in `database/migrations/`:
-   ```
-   YYYYMMDD_description.sql
-   ```
-   Example: `20240115_add_monster_tags.sql`
+1. Create a new `.sql` file in the `database/` directory.
 
-2. Write your SQL:
+2. Write your SQL (use `IF NOT EXISTS` for idempotency):
    ```sql
-   -- Add tags column to monsters table
-   ALTER TABLE monsters ADD COLUMN tags TEXT[];
-   
-   -- Create index
-   CREATE INDEX idx_monsters_tags ON monsters USING GIN(tags);
+   ALTER TABLE monsters ADD COLUMN IF NOT EXISTS tags TEXT[];
+   CREATE INDEX IF NOT EXISTS idx_monsters_tags ON monsters USING GIN(tags);
    ```
 
-3. Run the migration:
+3. Add the filename to the `migrations` array in `database/migrate.js`:
+   ```javascript
+   const migrations = [
+     'add-race.sql',
+     'add-subclass.sql',
+     'add-background-alignment.sql',
+     'add-features-items.sql',
+     'add-reference-tables.sql',
+     'your-new-migration.sql',  // <-- add here
+   ];
+   ```
+
+4. Run the migration:
    ```bash
    npm run db:migrate
    ```

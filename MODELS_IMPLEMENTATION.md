@@ -136,7 +136,16 @@ The schema was already in place and includes:
 - Coordinates: numbers
 
 ### 3. Database Migration (`database/migrate.js`)
-Script to run schema.sql and initialize database:
+Runs the base schema followed by additional migration files in a defined order:
+1. `schema.sql` — base tables and indexes
+2. `add-race.sql` — race column for characters
+3. `add-subclass.sql` — subclass support
+4. `add-background-alignment.sql` — background and alignment fields
+5. `add-features-items.sql` — class/racial features and magical items JSONB columns
+6. `add-reference-tables.sql` — D&D 5e reference data
+
+Missing migration files are skipped with a warning rather than failing the process.
+
 ```bash
 npm run db:migrate
 ```

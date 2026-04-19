@@ -34,16 +34,16 @@ app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', message: 'Siege of Neverwinter API is running' });
 });
 
+// Error handling middleware
+const { errorHandler, notFoundHandler } = require('./middleware/errorHandler');
+
+// 404 handler for undefined API routes (must be after all API routes)
+app.use('/api/*', notFoundHandler);
+
 // Serve index.html for all other routes (SPA support)
 app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, '../client/legacy/index.html'));
 });
-
-// Error handling middleware
-const { errorHandler, notFoundHandler } = require('./middleware/errorHandler');
-
-// 404 handler for undefined API routes (must be after all other routes)
-app.use('/api/*', notFoundHandler);
 
 // Global error handler (must be last)
 app.use(errorHandler);

@@ -154,6 +154,7 @@ All API endpoints are prefixed with `/api`:
 - `/api/locations` - City map locations
 - `/api/plotpoints` - Plot point management
 - `/api/preferences` - User preferences
+- `/api/ai` - AI assistant proxy (ChatGPT / Claude)
 
 ## Configuration
 

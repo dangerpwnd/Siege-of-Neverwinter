@@ -11,12 +11,31 @@ async function runMigration() {
   try {
     console.log('Starting database migration...');
 
-    // Read the schema file
+    // Read and execute the main schema file
     const schemaPath = path.join(__dirname, 'schema.sql');
     const schema = fs.readFileSync(schemaPath, 'utf8');
-
-    // Execute the schema
     await db.query(schema);
+    console.log('✓ Base schema created');
+
+    // Run additional migrations in order
+    const migrations = [
+      'add-race.sql',
+      'add-subclass.sql',
+      'add-background-alignment.sql',
+      'add-features-items.sql',
+      'add-reference-tables.sql',
+    ];
+
+    for (const file of migrations) {
+      const filePath = path.join(__dirname, file);
+      if (fs.existsSync(filePath)) {
+        const sql = fs.readFileSync(filePath, 'utf8');
+        await db.query(sql);
+        console.log(`✓ Applied migration: ${file}`);
+      } else {
+        console.warn(`⚠ Migration file not found, skipping: ${file}`);
+      }
+    }
 
     console.log('✓ Database migration completed successfully');
     console.log('✓ All tables created with indexes');
