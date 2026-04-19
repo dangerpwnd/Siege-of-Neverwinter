@@ -475,3 +475,182 @@
   - Profile memory usage and optimize if needed
   - Run performance tests and document results
   - _Requirements: All requirements (performance)_
+
+- [x] 20. Set up React + Tremor + Tailwind CSS build pipeline
+  - Initialize React project with Vite (or CRA) in the client directory
+  - Install Tremor (`@tremor/react`), Tailwind CSS, and Radix UI dependencies
+  - Configure `tailwind.config.js` with Tremor's required content paths and theme extensions
+  - Configure PostCSS with Tailwind CSS plugin
+  - Set up project entry point (`main.tsx`, `App.tsx`) with Tremor provider wrappers
+  - Remove legacy vanilla HTML/CSS/JS frontend files
+  - Verify Tremor components render correctly with a smoke test
+  - _Requirements: Frontend UI Library (Introduction), 9.3, 9.4_
+
+- [ ] 21. Migrate layout system to Tailwind CSS Grid and React
+  - [x] 21.1 Implement App Shell and Layout Manager component
+    - Create `LayoutManager` React component using Tailwind CSS Grid (`grid-cols-2`, `grid-cols-3`, `grid-cols-4`)
+    - Implement column count selector using Tremor `Select` component
+    - Implement drag-and-drop module repositioning with HTML5 Drag and Drop API within React
+    - Implement module expand/shrink using Tailwind grid `col-span` utilities
+    - Persist layout configuration via existing REST API (`/api/layout`)
+    - _Requirements: 11.1, 11.2, 11.3, 11.4, 11.5_
+
+  - [x] 21.2 Implement module visibility toggle system in React
+    - Create module wrapper component with show/hide toggle using Tremor `Button`
+    - Implement visibility state management with React state synced to `/api/preferences`
+    - Ensure module isolation (toggling one doesn't affect others)
+    - _Requirements: 9.1, 9.2, 9.5_
+
+- [ ] 22. Migrate Initiative Tracker to Tremor components
+  - [x] 22.1 Implement Initiative Tracker with Tremor Table and Badge
+    - Create `InitiativeTracker` component wrapped in Tremor `Card`
+    - Use Tremor `Table`, `TableHead`, `TableBody`, `TableRow` for combatant list
+    - Use Tremor `Badge` for combatant type indicators (PC/NPC/Monster) and condition indicators
+    - Use Tremor `Button` for next turn, add/remove combatant actions
+    - Use Tremor `NumberInput` for initiative value entry
+    - Wire to existing backend API endpoints (`/api/initiative`)
+    - _Requirements: 1.1, 1.2, 1.3, 1.4, 1.5, 4.4_
+
+- [ ] 23. Migrate Character and NPC Panels to Tremor components
+  - [x] 23.1 Implement Character Panel with Tremor inputs and badges
+    - Create `CharacterPanel` component wrapped in Tremor `Card`
+    - Use Tremor `NumberInput` for HP, AC, saving throw modifiers
+    - Use Tremor `Badge` for active conditions display
+    - Use Tremor `Tracker` for HP bar visualization
+    - Use Tremor `Divider` for section separators
+    - Wire to existing backend API endpoints (`/api/characters`)
+    - _Requirements: 2.1, 2.2, 2.3, 2.4, 2.5_
+
+  - [x] 23.2 Implement NPC Panel with Tremor components
+    - Create `NPCPanel` component with same Tremor components as Character Panel (display parity)
+    - Use Tremor `TextInput` and `NumberInput` for NPC stat editing
+    - Use Tremor `Badge` for conditions, `Tracker` for HP bar
+    - Wire to existing backend API endpoints (`/api/npcs`)
+    - _Requirements: 4.1, 4.2, 4.3, 4.5_
+
+- [ ] 24. Migrate Monster Database to Tremor components
+  - [x] 24.1 Implement Monster Database with Tremor Table, Dialog, and SearchSelect
+    - Create `MonsterDatabase` component wrapped in Tremor `Card`
+    - Use Tremor `Table` for monster list display
+    - Use Tremor `SearchSelect` for monster filtering/search
+    - Use Tremor `Dialog` for full stat block detail view
+    - Use Tremor `Button` for "add to encounter" action
+    - Wire to existing backend API endpoints (`/api/monsters`)
+    - _Requirements: 5.1, 5.2, 5.3, 5.4, 5.5_
+
+- [ ] 25. Migrate Siege Mechanics to Tremor components
+  - [x] 25.1 Implement Siege Mechanics with Tremor BarChart, Tracker, and Textarea
+    - Create `SiegeMechanics` component wrapped in Tremor `Card`
+    - Use Tremor `BarChart` for resource level visualization (wall integrity, morale, supplies)
+    - Use Tremor `Tracker` for individual metric progress bars
+    - Use Tremor `Textarea` for siege notes
+    - Use Tremor `NumberInput` for custom metric values
+    - Wire to existing backend API endpoints (`/api/siege`)
+    - _Requirements: 6.1, 6.2, 6.3, 6.4, 6.5_
+
+- [ ] 26. Migrate City Map to React with Tremor Legend and Badge
+  - [x] 26.1 Implement City Map component in React
+    - Create `CityMap` component wrapped in Tremor `Card`
+    - Render SVG map within React component with event handlers
+    - Use Tremor `Legend` for location status color key
+    - Use Tremor `Badge` for plot point markers
+    - Implement location click handlers showing data from API
+    - Wire to existing backend API endpoints (`/api/locations`, `/api/plotpoints`)
+    - _Requirements: 8.1, 8.2, 8.3, 8.4, 8.5_
+
+- [x] 27. Checkpoint - Verify Tremor migration
+  - Ensure all modules render correctly with Tremor components
+  - Ensure all existing backend API integrations still function
+  - Ensure layout system works with Tailwind CSS Grid
+  - Ensure all tests pass, ask the user if questions arise.
+
+- [ ] 28. Implement Claude AI provider backend integration
+  - [x] 28.1 Implement AIProviderService abstraction and ClaudeProvider
+    - Create `AIProviderService` interface with `sendMessage`, `validateApiKey` methods
+    - Refactor existing ChatGPT integration into `ChatGPTProvider` implementing the interface
+    - Create `ClaudeProvider` implementing the interface with Anthropic API (`https://api.anthropic.com/v1/messages`)
+    - Include required headers: `x-api-key`, `anthropic-version: 2023-06-01`
+    - Implement system prompt via Anthropic's `system` parameter (not as message role)
+    - Ensure both providers receive equivalent campaign context in system prompt
+    - _Requirements: 12.2, 12.8_
+
+  - [x] 28.2 Implement provider switching and API key validation on backend
+    - Add REST API endpoint for provider selection (PUT `/api/ai/provider`)
+    - Add REST API endpoint for API key validation (POST `/api/ai/validate-key`)
+    - Implement Anthropic API key validation (test call to verify key)
+    - Persist provider preference in database via existing preferences system
+    - Implement conversation history clearing on provider switch
+    - _Requirements: 12.4, 12.5, 12.6_
+
+  - [x] 28.3 Implement provider-specific error handling
+    - Handle Claude-specific errors: rate limiting (429), overloaded (529)
+    - Implement retry logic with exponential backoff for Claude API
+    - Return provider-identifying error messages suggesting alternative provider
+    - Handle network timeouts (30 second timeout) for Claude
+    - _Requirements: 12.7_
+
+- [ ] 29. Migrate AI Assistant UI to Tremor with provider selector
+  - [x] 29.1 Implement AI Assistant component with Tremor and provider selection
+    - Create `AIAssistant` component wrapped in Tremor `Card`
+    - Use Tremor `TextInput` for message input
+    - Use Tremor `List` for conversation history display
+    - Use Tremor `Button` for send message action
+    - Use Tremor `Callout` for error/status messages (provider-specific errors)
+    - Use Tremor `Select` for provider selector (ChatGPT / Claude)
+    - Implement provider switching with conversation history clearing in UI
+    - Disable Claude option when no valid Anthropic API key is configured
+    - Wire to backend AI endpoints (`/api/ai/provider`, `/api/ai/validate-key`, existing message endpoint)
+    - _Requirements: 12.1, 12.3, 12.5, 12.6, 12.7, 7.1, 7.2, 7.4_
+
+- [x] 30. Checkpoint - Verify Claude integration
+  - Ensure provider switching works end-to-end
+  - Ensure conversation history clears on provider switch
+  - Ensure API key validation gates Claude availability
+  - Ensure all tests pass, ask the user if questions arise.
+
+- [ ] 31. Write property tests for Claude AI provider integration
+  - [x] 31.1 Write property test for provider selector availability
+    - **Property 46: Provider selector availability**
+    - **Validates: Requirements 12.1**
+
+  - [x] 31.2 Write property test for Claude message context parity
+    - **Property 47: Claude message context parity**
+    - **Validates: Requirements 12.2**
+
+  - [x] 31.3 Write property test for Claude response display
+    - **Property 48: Claude response display in shared interface**
+    - **Validates: Requirements 12.3**
+
+  - [x] 31.4 Write property test for provider preference persistence
+    - **Property 49: AI provider preference persistence round-trip**
+    - **Validates: Requirements 12.4**
+
+  - [x] 31.5 Write property test for provider switch clears history
+    - **Property 50: Provider switch clears history**
+    - **Validates: Requirements 12.5**
+
+  - [x] 31.6 Write property test for Claude API key validation gate
+    - **Property 51: Claude API key validation gate**
+    - **Validates: Requirements 12.6**
+
+  - [x] 31.7 Write property test for provider-specific error messaging
+    - **Property 52: Provider-specific error messaging**
+    - **Validates: Requirements 12.7**
+
+  - [x] 31.8 Write property test for system prompt equivalence
+    - **Property 53: System prompt equivalence across providers**
+    - **Validates: Requirements 12.8**
+
+- [x] 32. Final checkpoint - Ensure all tests pass
+  - Ensure all tests pass, ask the user if questions arise.
+  - Verify full application works with React + Tremor UI
+  - Verify Claude and ChatGPT providers both function correctly
+
+## Notes
+
+- Tasks 20-27 cover the React + Tremor + Tailwind CSS migration from vanilla HTML/CSS/JS
+- Tasks 28-29 cover the Claude AI provider integration (Requirement 12)
+- Tasks marked with `*` are optional property tests and can be skipped for faster MVP
+- Each task references specific requirements for traceability
+- Checkpoints ensure incremental validation
+- All new tasks build on the existing completed backend API infrastructure

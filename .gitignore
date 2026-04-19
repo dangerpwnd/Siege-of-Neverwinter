@@ -3,3 +3,6 @@ node_modules/
 *.log
 .DS_Store
 .vscode/settings.json
+
+# Client build output
+client/dist/

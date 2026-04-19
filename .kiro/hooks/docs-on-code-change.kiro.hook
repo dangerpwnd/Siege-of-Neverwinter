@@ -1,0 +1,21 @@
+{
+  "enabled": true,
+  "name": "Update Docs on Code Change",
+  "description": "Monitors JavaScript source files and prompts the agent to update relevant documentation in README.md or markdown files when code changes are detected",
+  "version": "1",
+  "when": {
+    "type": "fileEdited",
+    "patterns": [
+      "*.js",
+      "*.sql",
+      "*.html",
+      "*.css"
+    ]
+  },
+  "then": {
+    "type": "askAgent",
+    "prompt": "A source file was just modified. Review the changes and update the relevant documentation files (README.md or other .md files) to reflect any new features, API changes, or important implementation details. Focus on keeping documentation accurate and helpful for users."
+  },
+  "workspaceFolderName": "SiegeOfNeverwinter",
+  "shortName": "docs-on-code-change"
+}

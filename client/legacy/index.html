@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Siege of Neverwinter - Campaign Manager</title>
+    <meta name="description" content="D&D 5th edition campaign management tool for the Siege of Neverwinter">
+    <link rel="stylesheet" href="styles/main.css">
+    <link rel="stylesheet" href="styles/loading.css">
+</head>
+<body>
+    <div id="app" role="application" aria-label="Siege of Neverwinter Campaign Manager">
+        <header class="app-header" role="banner">
+            <h1 id="app-title">Siege of Neverwinter</h1>
+            <nav class="header-controls" role="navigation" aria-label="Campaign controls">
+                <select id="campaign-selector" class="campaign-selector" 
+                        aria-label="Select active campaign"
+                        aria-describedby="campaign-selector-help">
+                    <option value="">Loading campaigns...</option>
+                </select>
+                <span id="campaign-selector-help" class="sr-only">
+                    Choose a campaign to load or manage
+                </span>
+                
+                <button id="new-campaign-btn" class="btn btn-secondary" 
+                        aria-label="Create new campaign"
+                        title="Create a new campaign">
+                    <span aria-hidden="true">New</span>
+                </button>
+                
+                <button id="export-campaign-btn" class="btn btn-secondary" 
+                        aria-label="Export current campaign to file"
+                        title="Export campaign data">
+                    <span aria-hidden="true">Export</span>
+                </button>
+                
+                <button id="import-campaign-btn" class="btn btn-secondary" 
+                        aria-label="Import campaign from file"
+                        title="Import campaign data">
+                    <span aria-hidden="true">Import</span>
+                </button>
+                
+                <input type="file" id="import-file-input" 
+                       accept=".json" 
+                       style="display: none;"
+                       aria-label="Select campaign file to import">
+                
+                <button id="save-btn" class="btn btn-primary" 
+                        aria-label="Save current campaign"
+                        title="Save all campaign data">
+                    <span aria-hidden="true">Save Campaign</span>
+                </button>
+                
+                <button id="settings-btn" class="btn btn-secondary" 
+                        aria-label="Open application settings"
+                        title="Configure application settings">
+                    <span aria-hidden="true">Settings</span>
+                </button>
+            </nav>
+        </header>
+
+        <main class="app-main" id="main-content" role="main" aria-label="Campaign modules">
+            <!-- Module Grid Container -->
+            <div class="module-grid" role="region" aria-label="Campaign management modules">
+                <!-- Initiative Tracker Module -->
+                <section id="initiative-module" class="module" data-module="initiative" 
+                         role="region" aria-labelledby="initiative-title">
+                    <div class="module-header">
+                        <h2 id="initiative-title">Initiative Tracker</h2>
+                        <button class="module-toggle" 
+                                aria-label="Collapse or expand Initiative Tracker module"
+                                aria-expanded="true"
+                                aria-controls="initiative-content">
+                            <span aria-hidden="true">−</span>
+                        </button>
+                    </div>
+                    <div class="module-content" id="initiative-content" 
+                         role="region" aria-label="Initiative tracker content">
+                        <!-- Initiative tracker content will be rendered here -->
+                    </div>
+                </section>
+
+                <!-- Character Panel Module -->
+                <section id="character-module" class="module" data-module="character" 
+                         role="region" aria-labelledby="character-title">
+                    <div class="module-header">
+                        <h2 id="character-title">Character Panel</h2>
+                        <button class="module-toggle" 
+                                aria-label="Collapse or expand Character Panel module"
+                                aria-expanded="true"
+                                aria-controls="character-content">
+                            <span aria-hidden="true">−</span>
+                        </button>
+                    </div>
+                    <div class="module-content" id="character-content" 
+                         role="region" aria-label="Character details">
+                        <!-- Character details will be rendered here -->
+                    </div>
+                </section>
+
+                <!-- NPC Panel Module -->
+                <section id="npc-module" class="module" data-module="npc" 
+                         role="region" aria-labelledby="npc-title">
+                    <div class="module-header">
+                        <h2 id="npc-title">NPC Panel</h2>
+                        <button class="module-toggle" 
+                                aria-label="Collapse or expand NPC Panel module"
+                                aria-expanded="true"
+                                aria-controls="npc-content">
+                            <span aria-hidden="true">−</span>
+                        </button>
+                    </div>
+                    <div class="module-content" id="npc-content" 
+                         role="region" aria-label="NPC details">
+                        <!-- NPC details will be rendered here -->
+                    </div>
+                </section>
+
+                <!-- Monster Database Module -->
+                <section id="monster-module" class="module" data-module="monster" 
+                         role="region" aria-labelledby="monster-title">
+                    <div class="module-header">
+                        <h2 id="monster-title">Monster Database</h2>
+                        <button class="module-toggle" 
+                                aria-label="Collapse or expand Monster Database module"
+                                aria-expanded="true"
+                                aria-controls="monster-content">
+                            <span aria-hidden="true">−</span>
+                        </button>
+                    </div>
+                    <div class="module-content" id="monster-content" 
+                         role="region" aria-label="Monster database">
+                        <!-- Monster database will be rendered here -->
+                    </div>
+                </section>
+
+                <!-- Siege Mechanics Module -->
+                <section id="siege-module" class="module" data-module="siege" 
+                         role="region" aria-labelledby="siege-title">
+                    <div class="module-header">
+                        <h2 id="siege-title">Siege Mechanics</h2>
+                        <button class="module-toggle" 
+                                aria-label="Collapse or expand Siege Mechanics module"
+                                aria-expanded="true"
+                                aria-controls="siege-content">
+                            <span aria-hidden="true">−</span>
+                        </button>
+                    </div>
+                    <div class="module-content" id="siege-content" 
+                         role="region" aria-label="Siege mechanics and notes">
+                        <!-- Siege mechanics will be rendered here -->
+                    </div>
+                </section>
+
+                <!-- AI Assistant Module -->
+                <section id="ai-module" class="module" data-module="ai" 
+                         role="region" aria-labelledby="ai-title">
+                    <div class="module-header">
+                        <h2 id="ai-title">AI DM Assistant</h2>
+                        <button class="module-toggle" 
+                                aria-label="Collapse or expand AI DM Assistant module"
+                                aria-expanded="true"
+                                aria-controls="ai-content">
+                            <span aria-hidden="true">−</span>
+                        </button>
+                    </div>
+                    <div class="module-content" id="ai-content" 
+                         role="region" aria-label="AI assistant conversation">
+                        <!-- AI assistant will be rendered here -->
+                    </div>
+                </section>
+
+                <!-- City Map Module -->
+                <section id="map-module" class="module" data-module="map" 
+                         role="region" aria-labelledby="map-title">
+                    <div class="module-header">
+                        <h2 id="map-title">City Map</h2>
+                        <button class="module-toggle" 
+                                aria-label="Collapse or expand City Map module"
+                                aria-expanded="true"
+                                aria-controls="map-content">
+                            <span aria-hidden="true">−</span>
+                        </button>
+                    </div>
+                    <div class="module-content" id="map-content" 
+                         role="region" aria-label="Neverwinter city map">
+                        <!-- City map will be rendered here -->
+                    </div>
+                </section>
+
+                <!-- Condition Manager Module -->
+                <section id="condition-module" class="module" data-module="condition" 
+                         role="region" aria-labelledby="condition-title">
+                    <div class="module-header">
+                        <h2 id="condition-title">Condition Manager</h2>
+                        <button class="module-toggle" 
+                                aria-label="Collapse or expand Condition Manager module"
+                                aria-expanded="true"
+                                aria-controls="condition-content">
+                            <span aria-hidden="true">−</span>
+                        </button>
+                    </div>
+                    <div class="module-content" id="condition-content" 
+                         role="region" aria-label="Condition management">
+                        <!-- Condition manager will be rendered here -->
+                        </div>
+                </section>
+            </div>
+        </main>
+    </div>
+
+    <!-- JavaScript Modules -->
+    <script type="module" src="js/main.js"></script>
+</body>
+</html>

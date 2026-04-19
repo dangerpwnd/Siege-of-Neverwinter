@@ -2,53 +2,121 @@
 
 ## Overview
 
-The Siege of Neverwinter application is a full-stack web application built with modern web technologies. The architecture follows a modular component-based design where each major feature (initiative tracker, character sheets, map, etc.) exists as an independent module that can be shown, hidden, and repositioned. The application uses PostgreSQL for persistent data storage and integrates with the OpenAI ChatGPT API for AI-powered DM assistance.
+The Siege of Neverwinter application is a full-stack web application built with modern web technologies. The architecture follows a modular component-based design where each major feature (initiative tracker, character sheets, map, etc.) exists as an independent module that can be shown, hidden, and repositioned. The application uses PostgreSQL for persistent data storage and integrates with both the OpenAI ChatGPT API and the Anthropic Claude API for AI-powered DM assistance, allowing the DM to choose their preferred provider.
 
 The technical stack consists of:
-- **Frontend**: HTML5, CSS3 (with CSS Grid/Flexbox for layout), and vanilla JavaScript (or a lightweight framework like Vue.js/React for component management)
+- **Frontend**: React with [Tremor](https://www.tremor.so/) UI component library, Tailwind CSS for styling, and Radix UI primitives (via Tremor)
 - **Backend**: Node.js with Express for REST API server
 - **Database**: PostgreSQL for persistent data storage
-- **API Integration**: OpenAI ChatGPT API for AI assistant functionality
-- **Map Rendering**: SVG or Canvas-based interactive map with clickable regions
+- **API Integration**: OpenAI ChatGPT API and Anthropic Claude API for AI assistant functionality (selectable by the DM)
+- **Map Rendering**: SVG or Canvas-based interactive map with clickable regions (rendered within React components)
 
 ## Architecture
 
 ### High-Level Architecture
 
-The application follows a client-server architecture with MVC pattern:
+The application follows a client-server architecture with MVC pattern. The frontend is built as a React + Tremor component hierarchy where each module is wrapped in a Tremor `Card` container and uses Tremor's dashboard-optimized components internally.
 
 ```
-┌─────────────────────────────────────────────────────────┐
-│                    User Interface Layer                  │
-│  ┌──────────┐ ┌──────────┐ ┌──────────┐ ┌──────────┐  │
-│  │Initiative│ │Character │ │  Siege   │ │   Map    │  │
-│  │ Tracker  │ │  Panels  │ │ Mechanics│ │  Viewer  │  │
-│  └──────────┘ └──────────┘ └──────────┘ └──────────┘  │
-│  ┌──────────┐ ┌──────────┐ ┌──────────┐               │
-│  │ Monster  │ │   NPC    │ │    AI    │               │
-│  │ Database │ │  Panel   │ │ Assistant│               │
-│  └──────────┘ └──────────┘ └──────────┘               │
-└─────────────────────────────────────────────────────────┘
+┌─────────────────────────────────────────────────────────────────────┐
+│                    React + Tremor UI Layer                           │
+│                                                                     │
+│  ┌─────────────────────────────────────────────────────────────┐   │
+│  │  App Shell (Tailwind CSS Grid Layout)                        │   │
+│  │  ┌─────────────────────────────────────────────────────┐    │   │
+│  │  │  Layout Manager (CSS Grid: 2/3/4 cols)              │    │   │
+│  │  │                                                     │    │   │
+│  │  │  ┌─────────────┐  ┌─────────────┐  ┌───────────┐  │    │   │
+│  │  │  │ Card:       │  │ Card:       │  │ Card:     │  │    │   │
+│  │  │  │ Initiative  │  │ Character   │  │ Siege     │  │    │   │
+│  │  │  │ (Table,     │  │ (TextInput, │  │ (BarChart,│  │    │   │
+│  │  │  │  Badge)     │  │  Badge,     │  │  Tracker, │  │    │   │
+│  │  │  │             │  │  Tracker)   │  │  Textarea)│  │    │   │
+│  │  │  └─────────────┘  └─────────────┘  └───────────┘  │    │   │
+│  │  │  ┌─────────────┐  ┌─────────────┐  ┌───────────┐  │    │   │
+│  │  │  │ Card:       │  │ Card:       │  │ Card:     │  │    │   │
+│  │  │  │ Monster DB  │  │ NPC Panel   │  │ AI Chat   │  │    │   │
+│  │  │  │ (Table,     │  │ (TextInput, │  │ (TextInput│  │    │   │
+│  │  │  │  Dialog,    │  │  Badge,     │  │  List)    │  │    │   │
+│  │  │  │  List)      │  │  Tracker)   │  │           │  │    │   │
+│  │  │  └─────────────┘  └─────────────┘  └───────────┘  │    │   │
+│  │  │  ┌─────────────────────────────────────────────┐   │    │   │
+│  │  │  │ Card: City Map (SVG + Tremor Legend/Badge)   │   │    │   │
+│  │  │  └─────────────────────────────────────────────┘   │    │   │
+│  │  └─────────────────────────────────────────────────────┘    │   │
+│  └─────────────────────────────────────────────────────────────┘   │
+└─────────────────────────────────────────────────────────────────────┘
                          │ HTTP/REST API
-┌─────────────────────────────────────────────────────────┐
-│                  Backend API Layer (Node.js/Express)     │
-│  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐ │
-│  │   Combat     │  │   Character  │  │    Siege     │ │
-│  │   Routes     │  │    Routes    │  │    Routes    │ │
-│  └──────────────┘  └──────────────┘  └──────────────┘ │
-│  ┌──────────────┐  ┌──────────────┐                   │
-│  │     Map      │  │      AI      │                   │
-│  │   Routes     │  │    Routes    │                   │
-│  └──────────────┘  └──────────────┘                   │
-└─────────────────────────────────────────────────────────┘
+┌─────────────────────────────────────────────────────────────────────┐
+│                  Backend API Layer (Node.js/Express)                 │
+│  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐             │
+│  │   Combat     │  │   Character  │  │    Siege     │             │
+│  │   Routes     │  │    Routes    │  │    Routes    │             │
+│  └──────────────┘  └──────────────┘  └──────────────┘             │
+│  ┌──────────────┐  ┌──────────────┐                               │
+│  │     Map      │  │      AI      │                               │
+│  │   Routes     │  │    Routes    │                               │
+│  └──────────────┘  └──────────────┘                               │
+└─────────────────────────────────────────────────────────────────────┘
                          │
-┌─────────────────────────────────────────────────────────┐
-│                     Data Layer                           │
-│  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐ │
-│  │  PostgreSQL  │  │   ChatGPT    │  │   Session    │ │
-│  │   Database   │  │     API      │  │   Manager    │ │
-│  └──────────────┘  └──────────────┘  └──────────────┘ │
-└─────────────────────────────────────────────────────────┘
+┌─────────────────────────────────────────────────────────────────────┐
+│                     Data Layer                                       │
+│  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐             │
+│  │  PostgreSQL  │  │   ChatGPT    │  │   Claude     │             │
+│  │   Database   │  │     API      │  │     API      │             │
+│  └──────────────┘  └──────────────┘  └──────────────┘             │
+│                    ┌──────────────┐                                 │
+│                    │   Session    │                                 │
+│                    │   Manager    │                                 │
+│                    └──────────────┘                                 │
+└─────────────────────────────────────────────────────────────────────┘
+```
+
+### Tremor Component Hierarchy
+
+```mermaid
+graph TD
+    App[App Shell] --> LM[Layout Manager]
+    LM --> IT[Initiative Tracker Card]
+    LM --> CP[Character Panel Card]
+    LM --> SM[Siege Mechanics Card]
+    LM --> MD[Monster Database Card]
+    LM --> NP[NPC Panel Card]
+    LM --> AI[AI Assistant Card]
+    LM --> CM[City Map Card]
+
+    IT --> IT_Table[Table + TableHead + TableBody + TableRow]
+    IT --> IT_Badge[Badge - combatant type indicators]
+    IT --> IT_Button[Button - next turn, add/remove]
+
+    CP --> CP_Input[NumberInput - HP, AC, saves]
+    CP --> CP_Badge[Badge - conditions]
+    CP --> CP_Tracker[Tracker - HP bar]
+    CP --> CP_Divider[Divider - section separators]
+
+    SM --> SM_BarChart[BarChart - resource levels]
+    SM --> SM_Tracker[Tracker - wall/morale/supplies]
+    SM --> SM_Textarea[Textarea - siege notes]
+    SM --> SM_NumberInput[NumberInput - custom metrics]
+
+    MD --> MD_Table[Table - monster list]
+    MD --> MD_Dialog[Dialog - stat block detail view]
+    MD --> MD_Button[Button - add to encounter]
+    MD --> MD_SearchSelect[SearchSelect - filter monsters]
+
+    NP --> NP_Input[TextInput/NumberInput - NPC stats]
+    NP --> NP_Badge[Badge - conditions]
+    NP --> NP_Tracker[Tracker - HP bar]
+
+    AI --> AI_Input[TextInput - message input]
+    AI --> AI_List[List - conversation history]
+    AI --> AI_Button[Button - send message]
+    AI --> AI_Callout[Callout - error/status messages]
+    AI --> AI_Select[Select - provider selector ChatGPT/Claude]
+
+    CM --> CM_SVG[SVG Map - interactive regions]
+    CM --> CM_Legend[Legend - location status colors]
+    CM --> CM_Badge[Badge - plot point markers]
 ```
 
 ### Module System
@@ -124,13 +192,16 @@ The application supports flexible column-based layouts:
 - **State**: Siege metrics object, notes array
 
 #### 6. AI Assistant Component
-- **Purpose**: Interfaces with ChatGPT API for DM assistance
+- **Purpose**: Interfaces with ChatGPT API or Claude API for DM assistance, with provider selection
 - **Interface**:
-  - `sendMessage(userMessage)`: Sends message to API
-  - `getResponse()`: Retrieves AI response
+  - `sendMessage(userMessage)`: Sends message to the active AI provider's API
+  - `getResponse()`: Retrieves AI response from the active provider
   - `clearHistory()`: Resets conversation
-  - `setContext(campaignContext)`: Updates system prompt
-- **State**: Conversation history, API configuration
+  - `setContext(campaignContext)`: Updates system prompt for both providers
+  - `setProvider(provider)`: Switches between 'chatgpt' and 'claude' providers
+  - `getProvider()`: Returns the currently active provider
+  - `validateApiKey(provider, key)`: Validates an API key for the specified provider
+- **State**: Conversation history, API configuration, active provider, provider API keys
 
 #### 7. City Map Component
 - **Purpose**: Displays interactive Neverwinter map with plot points
@@ -279,6 +350,30 @@ The application supports flexible column-based layouts:
 
 **Design Rationale**: The layout model stores both the global column configuration and individual module positions. The `isExpanded` flag controls whether a module spans its full column width. This simple model supports the required layout flexibility while remaining easy to persist and restore.
 
+### AI Provider Configuration Model
+```javascript
+{
+  activeProvider: 'chatgpt' | 'claude',
+  providers: {
+    chatgpt: {
+      apiKey: string,
+      model: string, // e.g., 'gpt-4' or 'gpt-3.5-turbo'
+      temperature: number,
+      maxTokens: number,
+      enabled: boolean
+    },
+    claude: {
+      apiKey: string,
+      model: string, // e.g., 'claude-sonnet-4-20250514'
+      maxTokens: number,
+      enabled: boolean
+    }
+  }
+}
+```
+
+**Design Rationale**: A unified provider configuration model allows the system to manage multiple AI providers with a single interface. Each provider has its own API key and model settings, while the `activeProvider` field determines which one is currently in use. The `enabled` flag reflects whether a valid API key has been configured for that provider.
+
 
 ## Correctness Properties
 
@@ -404,6 +499,38 @@ The application supports flexible column-based layouts:
 *For any* sequence of messages in a session, all previous messages should be included in the conversation history
 **Validates: Requirements 7.4**
 
+### Property 46: Provider selector availability
+*For any* AI assistant settings view, the Provider Selector should display both ChatGPT and Claude as options
+**Validates: Requirements 12.1**
+
+### Property 47: Claude message context parity
+*For any* message sent to Claude, the transmitted payload should include the same campaign-specific context as messages sent to ChatGPT
+**Validates: Requirements 12.2**
+
+### Property 48: Claude response display in shared interface
+*For any* API response received from Claude, it should be displayed in the same conversational interface used for ChatGPT responses
+**Validates: Requirements 12.3**
+
+### Property 49: AI provider preference persistence round-trip
+*For any* AI provider selection, closing and reopening the application should restore the same provider selection
+**Validates: Requirements 12.4**
+
+### Property 50: Provider switch clears history
+*For any* provider switch operation, the conversation history should be empty after the switch completes
+**Validates: Requirements 12.5**
+
+### Property 51: Claude API key validation gate
+*For any* AI provider configuration, Claude should only be enabled as a selectable option when a valid Anthropic API key is configured
+**Validates: Requirements 12.6**
+
+### Property 52: Provider-specific error messaging
+*For any* AI provider API error, the error message displayed should identify the failing provider and suggest the alternative provider
+**Validates: Requirements 12.7**
+
+### Property 53: System prompt equivalence across providers
+*For any* campaign context, the system prompts sent to ChatGPT and Claude should contain equivalent instructional content, differing only in API formatting
+**Validates: Requirements 12.8**
+
 ### Property 31: Plot point location association
 *For any* location with plot points, clicking that location should display all associated plot points
 **Validates: Requirements 8.2**
@@ -498,9 +625,17 @@ The application supports flexible column-based layouts:
    - Validate API key before making requests
    - Provide offline mode message when API is unavailable
 
-2. **API Response Validation**
-   - Validate response structure before displaying
-   - Handle empty or malformed responses
+2. **Claude API Failures**
+   - Handle network timeouts (30 second timeout)
+   - Display user-friendly error messages for Anthropic API errors
+   - Implement retry logic with exponential backoff
+   - Handle rate limiting (429 errors) and overloaded (529 errors)
+   - Validate Anthropic API key before making requests
+   - Suggest switching to ChatGPT when Claude is unavailable, and vice versa
+
+3. **API Response Validation**
+   - Validate response structure before displaying (both OpenAI and Anthropic formats)
+   - Handle empty or malformed responses from either provider
    - Sanitize AI responses to prevent XSS attacks
 
 ### UI Error Handling
@@ -538,8 +673,10 @@ The application will use **Jest** as the testing framework for JavaScript unit t
 
 4. **API Integration**
    - Test ChatGPT API request formatting
-   - Test response parsing
-   - Test error handling with mocked API responses
+   - Test Claude API request formatting
+   - Test response parsing for both providers
+   - Test error handling with mocked API responses for both providers
+   - Test provider switching logic
 
 ### Property-Based Testing
 
@@ -593,13 +730,24 @@ The application will use **fast-check** as the property-based testing library fo
    - Property 44: Module shrink (test shrinking expanded modules)
    - Property 45: Layout persistence (test save/load cycles with different layouts)
 
+8. **AI Provider Properties**
+   - Property 46: Provider selector availability (test settings view)
+   - Property 47: Claude message context parity (test context equivalence across providers)
+   - Property 48: Claude response display in shared interface (test response rendering)
+   - Property 49: AI provider preference persistence (test save/load cycles)
+   - Property 50: Provider switch clears history (test switching between providers)
+   - Property 51: Claude API key validation gate (test enable/disable based on key)
+   - Property 52: Provider-specific error messaging (test error display for each provider)
+   - Property 53: System prompt equivalence (test prompt content across providers)
+
 ### Integration Testing
 
 Integration tests will verify:
 - End-to-end combat flow (add combatants → run combat → track conditions)
 - Module interaction (initiative tracker updates character panels)
 - Storage integration (save → reload → verify state)
-- AI assistant integration with real API calls (in development environment)
+- AI assistant integration with real API calls for both providers (in development environment)
+- AI provider switching and conversation reset
 
 ### Test Data Generators
 
@@ -612,6 +760,7 @@ For property-based testing, custom generators will be created:
 5. **Siege State Generator**: Generates valid siege mechanic states
 6. **Plot Point Generator**: Generates valid plot points with coordinates
 7. **Layout Configuration Generator**: Generates valid layout configurations with random column counts and module positions
+8. **AI Provider Configuration Generator**: Generates valid AI provider configurations with random provider selections and API settings
 
 **Design Rationale**: These generators enable thorough property-based testing by creating diverse, valid test inputs that exercise edge cases and combinations that manual test writing might miss.
 
@@ -619,20 +768,20 @@ For property-based testing, custom generators will be created:
 
 ### Technology Choices
 
-1. **Frontend Framework**: Vanilla JavaScript or Vue.js
-   - Vue.js recommended for reactive component management
-   - Lightweight and suitable for modular architecture
-   - Good developer experience with single-file components
+1. **Frontend Framework**: React with Tremor UI library
+   - React for reactive component management and modular architecture
+   - [Tremor](https://www.tremor.so/) provides 35+ accessible, open-source dashboard and chart components built on Tailwind CSS and Radix UI
+   - Tremor components used for: cards, tables, charts (siege metrics visualization), badges (conditions), dialogs, inputs, and layout primitives
+   - Radix UI primitives (included via Tremor) provide accessible, unstyled building blocks
 
-2. **CSS Framework**: Custom CSS with CSS Grid and Flexbox
-   - CSS Grid for column-based layout system (2, 3, or 4 columns)
-   - Flexbox for module internal layouts
-   - Provides full control over modular layout
-   - No unnecessary dependencies
-   - Responsive design built-in
-   - Grid template columns dynamically adjusted based on column count selection
+2. **CSS Framework**: Tailwind CSS (required by Tremor)
+   - Tailwind CSS utility classes for all styling, replacing custom CSS
+   - CSS Grid via Tailwind utilities for column-based layout system (2, 3, or 4 columns)
+   - Flexbox via Tailwind utilities for module internal layouts
+   - Responsive design via Tailwind breakpoint prefixes
+   - Tremor's built-in dark mode support via Tailwind's dark mode classes
 
-**Design Rationale**: CSS Grid is ideal for the column-based layout system as it natively supports dynamic column counts and makes drag-and-drop repositioning straightforward. The grid can be reconfigured simply by changing the `grid-template-columns` property.
+**Design Rationale**: Tremor provides a cohesive set of dashboard-oriented components that align well with the data-heavy nature of a D&D campaign manager (stat blocks, initiative tables, siege metric charts). Using Tremor with Tailwind CSS eliminates the need for custom CSS while providing accessible, well-tested components out of the box. CSS Grid layout is still achieved via Tailwind's grid utilities.
 
 3. **Backend**: Node.js with Express
    - RESTful API design
@@ -645,15 +794,17 @@ For property-based testing, custom generators will be created:
    - Connection pooling for performance
    - Migrations for schema management
 
-4. **Map Rendering**: SVG
+4. **Map Rendering**: SVG within React components
    - Scalable and resolution-independent
-   - Easy to add interactive elements
+   - Easy to add interactive elements via React event handlers
    - Good browser support
-   - Can be styled with CSS
+   - Can be styled with Tailwind CSS utility classes
 
-### ChatGPT Integration
+### AI Provider Integration
 
-**System Prompt Template**:
+The AI assistant supports two providers through a unified interface. Both providers receive the same campaign context and system prompt content, adapted for each provider's API format.
+
+**System Prompt Template** (shared across providers):
 ```
 You are an experienced Dungeon Master running a D&D 5th edition campaign. 
 The party of 5 adventurers is currently defending Neverwinter during a siege 
@@ -671,24 +822,38 @@ the players feel like heroes defending their city.
 Current context: {siege_status}, {active_combatants}, {location_info}
 ```
 
-**API Configuration**:
+**ChatGPT API Configuration (OpenAI)**:
 - Model: gpt-4 or gpt-3.5-turbo
 - Temperature: 0.7 (balanced creativity and consistency)
 - Max tokens: 500 (concise responses)
 - Presence penalty: 0.3 (encourage variety)
 - Frequency penalty: 0.3 (reduce repetition)
+- API endpoint: `https://api.openai.com/v1/chat/completions`
+- Auth header: `Authorization: Bearer {openai_api_key}`
+
+**Claude API Configuration (Anthropic)**:
+- Model: claude-sonnet-4-20250514 or claude-3-haiku-20240307
+- Max tokens: 500 (concise responses)
+- API endpoint: `https://api.anthropic.com/v1/messages`
+- Auth header: `x-api-key: {anthropic_api_key}`
+- Required header: `anthropic-version: 2023-06-01`
+- System prompt passed via the `system` parameter (not as a message role)
+
+**Provider Abstraction**: The backend implements an `AIProviderService` interface with two implementations (`ChatGPTProvider` and `ClaudeProvider`). Each provider translates the shared system prompt and conversation history into the provider-specific API format. The active provider is determined by the user's persisted preference.
+
+**Design Rationale**: Abstracting the AI provider behind a common interface allows the system to support multiple providers without duplicating conversation UI logic. The DM can switch providers based on preference, availability, or API quota without losing the campaign context setup.
 
 ### Performance Considerations
 
 1. **Initiative Tracker**: Use efficient sorting algorithm (O(n log n))
-2. **Condition Rendering**: Use CSS classes for condition indicators to avoid DOM manipulation
+2. **Condition Rendering**: Use Tremor Badge components for condition indicators, leveraging React's virtual DOM for efficient updates
 3. **Map Rendering**: Lazy load map details, render only visible areas
 4. **Storage**: Debounce save operations to avoid excessive writes
-5. **AI Requests**: Implement request queuing to prevent concurrent API calls
-6. **Layout Reconfiguration**: Use CSS Grid's native reconfiguration rather than DOM manipulation for column changes
+5. **AI Requests**: Implement request queuing to prevent concurrent API calls to either provider
+6. **Layout Reconfiguration**: Use Tailwind CSS Grid utilities for column changes, minimizing re-renders with React.memo where appropriate
 7. **Drag and Drop**: Use CSS transforms for smooth drag animations without triggering layout recalculations
 
-**Design Rationale**: These optimizations ensure the application remains responsive even with complex layouts and multiple modules. CSS Grid's performance characteristics make it well-suited for dynamic layout changes without performance penalties.
+**Design Rationale**: These optimizations ensure the application remains responsive even with complex layouts and multiple modules. React's virtual DOM diffing combined with Tailwind's utility-first approach minimizes unnecessary DOM updates. Tremor components are pre-optimized for dashboard performance.
 
 ### Accessibility
 
@@ -700,10 +865,11 @@ Current context: {siege_status}, {active_combatants}, {location_info}
 
 ### Security
 
-1. **API Key Protection**: Store ChatGPT API key securely (environment variable or user input)
+1. **API Key Protection**: Store ChatGPT and Claude API keys securely (environment variables or user input, never in client-side code)
 2. **Input Sanitization**: Sanitize all user inputs to prevent XSS
 3. **Content Security Policy**: Implement CSP headers
-4. **AI Response Sanitization**: Sanitize AI responses before rendering
+4. **AI Response Sanitization**: Sanitize AI responses from both providers before rendering
+5. **API Key Validation**: Validate API keys server-side before storing or using them
 
 ## Future Enhancements
 

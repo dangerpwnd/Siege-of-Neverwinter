@@ -4,6 +4,10 @@
 
 The Siege of Neverwinter application is a web-based D&D 5th edition campaign management tool designed to support a Dungeon Master running a siege scenario for a party of 5 adventurers. The system provides modular components for tracking initiative, managing character and NPC details, monitoring siege mechanics, integrating AI-powered DM assistance, and visualizing the city state during the siege. The application focuses on the specific narrative of Neverwinter under siege by the forces of Tiamat.
 
+### Frontend UI Library
+
+The frontend SHALL use [Tremor](https://www.tremor.so/) as the primary UI component library. Tremor is a React-based component library built on Tailwind CSS and Radix UI, providing 35+ accessible, open-source components optimized for dashboards and data visualization. This requires the frontend to be built with React and Tailwind CSS as foundational dependencies.
+
 ## Glossary
 
 - **System**: The Siege of Neverwinter web application
@@ -16,7 +20,9 @@ The Siege of Neverwinter application is a web-based D&D 5th edition campaign man
 - **Siege Mechanics**: Rules and tracking for large-scale battle elements
 - **City State**: The current condition of Neverwinter during the siege
 - **Plot Point**: A location or event marker on the city map
-- **AI DM Assistant**: ChatGPT integration providing narrative and mechanical guidance
+- **AI DM Assistant**: AI integration providing narrative and mechanical guidance, supporting ChatGPT and Claude as provider options
+- **AI Provider**: The selected AI backend service (ChatGPT via OpenAI API or Claude via Anthropic API)
+- **Provider Selector**: A UI control allowing the DM to choose between available AI providers
 
 ## Requirements
 
@@ -103,6 +109,21 @@ The Siege of Neverwinter application is a web-based D&D 5th edition campaign man
 3. THE System SHALL include a system prompt that establishes the AI's role as a DM for the Siege of Neverwinter campaign
 4. THE System SHALL maintain conversation history within a session for contextual responses
 5. WHEN the DM requests mechanical rulings or narrative suggestions, THE System SHALL format prompts to elicit DM-appropriate responses
+
+### Requirement 12
+
+**User Story:** As a DM, I want to choose between ChatGPT and Claude as my AI assistant provider, so that I can use the AI service that best fits my preferences and API access.
+
+#### Acceptance Criteria
+
+1. WHEN the DM accesses the AI assistant settings, THE System SHALL display a Provider Selector with options for ChatGPT and Claude
+2. WHEN the DM selects Claude as the AI Provider, THE System SHALL transmit messages to the Anthropic API with the same campaign-specific context used for ChatGPT
+3. WHEN the Anthropic API responds, THE System SHALL display the response in the same conversational interface used for ChatGPT responses
+4. THE System SHALL persist the selected AI Provider preference across sessions
+5. WHEN the DM switches AI Provider, THE System SHALL clear the current conversation history and start a new conversation with the selected provider
+6. THE System SHALL require a valid Anthropic API key before enabling Claude as an AI Provider option
+7. IF the selected AI Provider API returns an error, THEN THE System SHALL display a provider-specific error message and suggest switching to the alternative provider
+8. THE System SHALL use equivalent system prompts for both providers, adapting only for provider-specific API formatting differences
 
 ### Requirement 8
 

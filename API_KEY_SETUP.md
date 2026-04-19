@@ -3,13 +3,24 @@
 This guide explains how to obtain and configure API keys for the Siege of Neverwinter application.
 
 ## Table of Contents
-1. [OpenAI API Key (for AI Assistant)](#openai-api-key)
-2. [Security Best Practices](#security-best-practices)
-3. [Troubleshooting](#troubleshooting)
+1. [Choosing an AI Provider](#choosing-an-ai-provider)
+2. [OpenAI API Key (GPT-4)](#openai-api-key)
+3. [Anthropic API Key (Claude)](#anthropic-api-key)
+4. [Switching Providers](#switching-providers)
+5. [Security Best Practices](#security-best-practices)
+6. [Troubleshooting](#troubleshooting)
+
+## Choosing an AI Provider
+
+The AI Assistant supports two providers:
+- **OpenAI (GPT-4)** — The default provider. Well-suited for creative narrative generation and D&D rules.
+- **Anthropic (Claude)** — An alternative provider. Known for detailed, nuanced responses.
+
+You can configure keys for both providers and switch between them at any time. Your selected provider is saved in browser local storage.
 
 ## OpenAI API Key
 
-The AI Assistant feature uses OpenAI's ChatGPT API to provide narrative suggestions and rules guidance. You'll need an OpenAI API key to use this feature.
+The AI Assistant can use OpenAI's ChatGPT API to provide narrative suggestions and rules guidance.
 
 ### Step 1: Create an OpenAI Account
 
@@ -68,18 +79,77 @@ The key will look like: `sk-proj-...` (starts with `sk-`)
 1. Start the application and open it in your browser
 2. Navigate to the AI Assistant module
 3. Click the settings/gear icon
-4. Paste your API key in the input field
-5. Click "Save"
-6. The key is stored in your browser's local storage
+4. Select "OpenAI (GPT-4)" as the provider
+5. Paste your API key in the input field
+6. Click "Save"
+7. The key is stored in your browser's local storage under `openai_api_key`
 
 **Note**: Option B is more secure as the key never touches the server or version control.
 
 ### Step 5: Test the Connection
 
 1. Open the AI Assistant module
-2. Type a test message: "Hello, are you working?"
-3. If configured correctly, you should receive a response
-4. If you see an error, check the troubleshooting section below
+2. Ensure "OpenAI (GPT-4)" is selected as the active provider
+3. Type a test message: "Hello, are you working?"
+4. If configured correctly, you should receive a response
+5. If you see an error, check the troubleshooting section below
+
+## Anthropic API Key
+
+The AI Assistant can also use Anthropic's Claude API as an alternative provider.
+
+### Step 1: Create an Anthropic Account
+
+1. Go to https://console.anthropic.com/
+2. Sign up with your email address
+3. Verify your email address
+
+### Step 2: Add Payment Method
+
+Anthropic's API is a paid service with usage-based pricing:
+
+1. Log in to https://console.anthropic.com
+2. Navigate to Billing settings
+3. Add a payment method
+
+### Step 3: Generate API Key
+
+1. Navigate to https://console.anthropic.com/settings/keys
+2. Click "Create Key"
+3. Give it a descriptive name (e.g., "Siege of Neverwinter")
+4. Copy the key immediately
+
+The key will look like: `sk-ant-...` (starts with `sk-ant-`)
+
+### Step 4: Configure in Application
+
+#### Option A: Environment Variable
+
+1. Open the `.env` file in the project root
+2. Add or update the line:
+   ```
+   ANTHROPIC_API_KEY=sk-ant-your-actual-key-here
+   ```
+3. Save the file and restart the server
+
+#### Option B: Browser Storage (Recommended)
+
+1. Open the AI Assistant module
+2. Select "Anthropic (Claude)" as the provider
+3. Paste your API key
+4. Click "Save"
+5. The key is stored in your browser's local storage under `anthropic_api_key`
+
+## Switching Providers
+
+You can switch between OpenAI and Anthropic at any time:
+
+1. Open the AI Assistant module
+2. Use the provider selector dropdown
+3. Choose your preferred provider
+4. Ensure the API key for that provider is configured
+
+Your provider preference is saved in local storage (`ai_provider`) and persists across sessions. Both API keys are stored independently, so switching providers doesn't require re-entering keys.
 
 ## Security Best Practices
 
@@ -137,11 +207,13 @@ Always use `.env.example` as a template:
 DATABASE_URL=postgresql://username:password@localhost:5432/siege_of_neverwinter
 PORT=3000
 OPENAI_API_KEY=your_openai_api_key_here
+ANTHROPIC_API_KEY=your_anthropic_api_key_here
 
 # .env (never commit)
 DATABASE_URL=postgresql://myuser:mypass@localhost:5432/siege_of_neverwinter
 PORT=3000
 OPENAI_API_KEY=sk-proj-actual-secret-key-here
+ANTHROPIC_API_KEY=sk-ant-actual-secret-key-here
 ```
 
 ## Troubleshooting
@@ -261,7 +333,7 @@ OPENAI_API_KEY=sk-proj-actual-secret-key-here
 
 The AI Assistant is optional. The application works fully without it:
 
-1. Simply don't configure an API key
+1. Simply don't configure any API keys
 2. Hide the AI Assistant module
 3. All other features work normally
 4. Use traditional D&D resources for rules and narrative
@@ -272,6 +344,10 @@ The AI Assistant is optional. The application works fully without it:
 - Documentation: https://platform.openai.com/docs
 - Help Center: https://help.openai.com
 - Community Forum: https://community.openai.com
+
+### Anthropic Support
+- Documentation: https://docs.anthropic.com
+- Console: https://console.anthropic.com
 
 ### Application Support
 - Check the DM_GUIDE.md for usage help

@@ -6,6 +6,7 @@
 const { Pool } = require('pg');
 const fs = require('fs');
 const path = require('path');
+const { seedDefaultCampaign } = require('./seed-default-campaign');
 require('dotenv').config();
 
 // ANSI color codes for better output
@@ -375,6 +376,13 @@ async function initializeDatabase() {
     const optimized = await applyOptimizations(pool);
     if (!optimized) {
       logWarning('Optimizations failed, but continuing...');
+    }
+    
+    // Step 2.75: Seed default campaign
+    logSection('Step 2.75: Seeding Default Campaign');
+    const seeded = await seedDefaultCampaign(pool);
+    if (!seeded) {
+      logWarning('Default campaign seeding failed, but continuing with initialization...');
     }
     
     // Step 3: Sanity checks

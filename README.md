@@ -8,7 +8,7 @@ A web-based D&D 5th edition campaign management tool for running the Siege of Ne
 - Character and NPC management panels
 - Monster database with instance tracking
 - Siege mechanics tracking
-- AI-powered DM Assistant (ChatGPT integration)
+- AI-powered DM Assistant (ChatGPT and Claude integration)
 - Interactive city map with plot points
 - Condition management system
 - Persistent data storage with PostgreSQL
@@ -19,7 +19,7 @@ A web-based D&D 5th edition campaign management tool for running the Siege of Ne
 - **[Quick Start](QUICKSTART.md)** - Get up and running quickly
 - **[Database Guide](DATABASE_GUIDE.md)** - Database setup, migrations, and troubleshooting
 - **[API Documentation](API_DOCUMENTATION.md)** - Complete REST API reference
-- **[API Key Setup](API_KEY_SETUP.md)** - How to configure OpenAI API for AI Assistant
+- **[API Key Setup](API_KEY_SETUP.md)** - How to configure AI provider API keys (OpenAI or Anthropic) for AI Assistant
 
 ## Quick Start
 
@@ -84,21 +84,27 @@ http://localhost:3000
 
 ```
 SiegeOfNeverwinter/
-├── client/                 # Frontend files
-│   ├── index.html         # Main HTML file
-│   ├── styles/            # CSS files
-│   │   └── main.css       # Main stylesheet
-│   └── js/                # JavaScript modules
-│       ├── main.js        # Application entry point
-│       ├── api.js         # REST API client
-│       └── state.js       # State management
+├── client/                 # React frontend (Vite)
+│   ├── index.html         # HTML entry point
+│   ├── src/               # React source files
+│   │   ├── App.tsx        # Root React component
+│   │   ├── main.tsx       # Vite entry point
+│   │   ├── index.css      # Global styles (Tailwind directives)
+│   │   ├── components/    # React components (Tremor-based)
+│   │   └── types/         # TypeScript type definitions
+│   ├── tailwind.config.js # Tailwind CSS + Tremor theme config
+│   ├── postcss.config.js  # PostCSS with Tailwind plugin
+│   ├── vite.config.ts     # Vite build configuration
+│   └── legacy/            # Legacy vanilla JS frontend (deprecated)
 ├── server/                # Backend files
 │   ├── index.js          # Express server
-│   └── routes/           # API route handlers
+│   ├── routes/           # API route handlers
+│   ├── models/           # Database models
+│   └── services/         # AI provider services
 ├── database/             # Database files
 │   ├── schema.sql        # Database schema
 │   └── db.js            # Database connection
-├── package.json          # Node.js dependencies
+├── package.json          # Node.js dependencies (server + tests)
 └── README.md            # This file
 ```
 
@@ -106,14 +112,30 @@ SiegeOfNeverwinter/
 
 The application uses a modular architecture:
 
-- **Frontend**: Vanilla JavaScript with ES6 modules
+- **Frontend**: React + TypeScript with Vite, styled using Tailwind CSS and Tremor UI components
 - **Backend**: Node.js with Express
 - **Database**: PostgreSQL with connection pooling
 - **API**: RESTful API design
 
+### Frontend Stack
+
+- **React** with TypeScript for component-based UI
+- **Tailwind CSS** for utility-first styling
+- **Tremor** (`@tremor/react`) for pre-built dashboard components (Cards, Tables, Badges, Charts, etc.)
+- **Vite** for fast dev server and builds
+- **PostCSS** with Tailwind plugin
+- **@headlessui/tailwindcss** for accessible UI primitives
+
+The Tailwind config (`client/tailwind.config.js`) includes Tremor's custom theme tokens (colors, shadows, border radii, font sizes) and a safelist for dynamic Tailwind color classes used by Tremor.
+
 ### Running in Development Mode
 
 ```bash
+# Start the backend server
+npm run dev
+
+# In a separate terminal, start the Vite dev server for the React frontend
+cd client
 npm run dev
 ```
 
@@ -140,6 +162,7 @@ Edit `.env` file to configure:
 - `DATABASE_URL` - PostgreSQL connection string
 - `PORT` - Server port (default: 3000)
 - `OPENAI_API_KEY` - OpenAI API key for AI assistant (see [API Key Setup](API_KEY_SETUP.md))
+- `ANTHROPIC_API_KEY` - Anthropic API key for Claude AI assistant (see [API Key Setup](API_KEY_SETUP.md))
 
 ## Available Scripts
 

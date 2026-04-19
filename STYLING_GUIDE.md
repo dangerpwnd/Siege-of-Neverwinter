@@ -211,6 +211,29 @@ Consistent spacing using CSS custom properties:
 - Black text
 - Page break avoidance for modules
 
+## Tailwind CSS + Tremor Integration (React Frontend)
+
+The React frontend uses Tailwind CSS with Tremor UI components. The Tailwind configuration (`client/tailwind.config.js`) extends the default theme with Tremor-specific design tokens:
+
+### Tremor Theme Tokens
+
+- **Colors**: `tremor.brand`, `tremor.background`, `tremor.border`, `tremor.ring`, `tremor.content` with semantic variants (faint, muted, subtle, DEFAULT, emphasis, inverted)
+- **Shadows**: `tremor-input`, `tremor-card`, `tremor-dropdown`
+- **Border Radii**: `tremor-small` (0.375rem), `tremor-default` (0.5rem), `tremor-full` (9999px)
+- **Font Sizes**: `tremor-label`, `tremor-default`, `tremor-title`, `tremor-metric`
+
+### Safelist
+
+Dynamic color classes used by Tremor are safelisted so they aren't purged during production builds. This covers `bg-`, `text-`, `border-`, `ring-`, `stroke-`, and `fill-` utilities across all standard Tailwind color palettes.
+
+### Plugins
+
+- `@headlessui/tailwindcss` — provides `ui-selected` and other state variants for accessible Headless UI components used by Tremor.
+
+### Usage in Components
+
+React components use Tremor's pre-built components (`Card`, `Table`, `Badge`, `Button`, `Select`, etc.) which are styled via these Tailwind tokens. Custom styling is applied with Tailwind utility classes alongside Tremor defaults.
+
 ## Browser Support
 
 - Modern browsers (Chrome, Firefox, Safari, Edge)
